@@ -1,0 +1,2 @@
+COM_PORT = "COM3"
+DEVICE_NAME = "Bluemo"
