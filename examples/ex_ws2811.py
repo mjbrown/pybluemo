@@ -13,14 +13,14 @@ def main():
 
     time.sleep(0.1)     # Give it a moment to stabilize prior to the massive load we're about to apply
     # set_ws2811 is required prior to diff_enc_ws2811 so that the attached part is configured
-    bluemo.set_ws2811(PORT_PIN_E["Port A Pin 0"], length=300, rgb_values=300*"\x02\x02\x02")
+    bluemo.set_ws2811(PORT_PIN_E["Port A Pin 0"], length=300, rgb_values=10*b"\x00\xFF\x00")
     time.sleep(1)
-    bluemo.diff_enc_ws2811(PORT_PIN_E["Port A Pin 0"], offset=10, length=10, color="\x10\x00\x00")
+    bluemo.diff_enc_ws2811(PORT_PIN_E["Port A Pin 0"], offset=10, length=10, color=b"\x10\x00\x00")
     time.sleep(1)
-    bluemo.diff_enc_ws2811(PORT_PIN_E["Port A Pin 0"], offset=30, length=10, color="\x00\x10\x00")
+    bluemo.diff_enc_ws2811(PORT_PIN_E["Port A Pin 0"], offset=30, length=10, color=b"\x00\x10\x00")
     time.sleep(1)
-    bluemo.diff_enc_ws2811(PORT_PIN_E["Port A Pin 0"], offset=50, length=10, color="\x00\x00\x10")
-    time.sleep(3)
+    bluemo.diff_enc_ws2811(PORT_PIN_E["Port A Pin 0"], offset=50, length=10, color=b"\x00\x00\x10")
+    time.sleep(10)
 
     client.disconnect(0)
 
