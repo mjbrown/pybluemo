@@ -85,10 +85,12 @@ class AbstractBaseBluemo(ProcedureManager):
 
     def serial_protocol(self):
         while len(self.buffer) > 2 and self.buffer[0] != SYNC_1:
+            logger.log(logging.DEBUG, "Discarding: %02X" % (self.buffer[0]))
             self.buffer = self.buffer[1:]
         if len(self.buffer) < 5:
             return
-        elif self.buffer[1] != SYNC_2:
+        if self.buffer[1] != SYNC_2:
+            logger.log(logging.DEBUG, "Discarding: %02X%02X" % (self.buffer[0], self.buffer[1]) )
             self.buffer = self.buffer[2:]
             self.serial_protocol()
             return
@@ -102,12 +104,20 @@ class AbstractBaseBluemo(ProcedureManager):
                 self.cmd_handler(message)
             else:
                 logger.log(logging.INFO, "Checksum mismatch: %d != %d" % (rx_checksum, calc_checksum))
+            self.serial_protocol()
+        else:
+            logger.log(logging.DEBUG, "Message incomplete %d < %d" % (len(self.buffer)-5, length))
 
     def cmd_handler(self, data):
         logger.log(logging.DEBUG, "Command Received: " + "-".join(["%02X" % i for i in data]))
-        if data[0] == BLUEMO_CMD_CODES["PWR_CTRL"]:
-            logger.log(logging.INFO, "%d Power Control Response - 3.3V:%d - Main:%d - 3.3VDIS:%d - MainDIS:%d - CHRG_EN:%d - HEAT:%d - CHRG_RATE:%d - BATT_VOLT:%d - EXTERN_VOLT:%d" %
-                       (time.time(), ord(data[2]), ord(data[3]), ord(data[4]), ord(data[5]), ord(data[6]), ord(data[7]), ord(data[8]), from_little_endian(data[9:11]), from_little_endian(data[11:])))
+        cmd = struct.pack("<B", data[0])
+        if cmd == BLUEMO_CMD_CODES["PWR_CTRL"]:
+            logger.log(logging.INFO, "Power Control Response - 3.3V:%d - Main:%d - 3.3VDIS:%d - MainDIS:%d - CHRG_EN:%d - HEAT:%d - CHRG_RATE:%d - BATT_VOLT:%d - EXTERN_VOLT:%d" %
+                       (ord(data[2]), ord(data[3]), ord(data[4]), ord(data[5]), ord(data[6]), ord(data[7]), ord(data[8]), from_little_endian(data[9:11]), from_little_endian(data[11:])))
+        elif cmd == BLUEMO_CMD_CODES["GPIO_CFG"]:
+            logger.log(logging.INFO, "GPIO Config Acknowledged.")
+        elif cmd == BLUEMO_CMD_CODES["GPIO_LISTEN"]:
+            logger.log(logging.INFO, "GPIO Listen Response - PortPin:%02X - State:%02X" % (data[2], data[3]))
 
     def send_command(self, cmd, payload, ack):
         checksum = sum([i for i in (cmd + b"\x00" + payload)]) & 0xFF
@@ -170,7 +180,6 @@ class AbstractBaseBluemo(ProcedureManager):
                            pwr_3v3_off_disconnect_enable, pwr_3v3_off_disconnect_disable, pwr_main_off_disconnect_enable,
                            pwr_main_off_disconnect_enable, pwr_main_off_disconnect_disable, chrg_enable, chrg_disable, chrg_rate,
                            overheat_protect_enable, overheat_protect_disable)
-        print(data)
         self.send_command(BLUEMO_CMD_CODES["PWR_CTRL"], data, None)
 
 
