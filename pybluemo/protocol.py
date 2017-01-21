@@ -19,18 +19,23 @@ BLUEMO_CHR_UUID = b"\x15\x52\x00\x02\x9C\x32\xC9\x81\x43\x4E\xE1\xB4\xD5\xB4\x41
 SYNC_1 = 0xAA
 SYNC_2 = 0x55
 
-BLUEMO_CMD_CODES = {"CMD_EXEC_ERR": b"\x00",
-                    "LOOPBACK":     b"\x01",
-                    "PWR_CTRL":  b"\x02",
-                    "SET_WS2811":     b"\x03",
-                    "DIFF_ENC_WS2811": b"\x04",
-                    "SERVO_CFG": b"\x05",
-                    "I2C_XFER": b"\x06",
-                    "GPIO_CFG":     b"\x07",
-                    "UART_CONFIG":  b"\x08",
-                    "UART_TX":      b"\x09",
-                    "HALF_DUPLEX":  b"\x0A",
-                    "ADV_CONFIG":   b"\x0B" }
+BLUEMO_CMD_CODES = {"CMD_EXEC_ERR":     b"\x00",
+                    "LOOPBACK":         b"\x01",
+                    "PWR_CTRL":         b"\x02",
+                    "SET_WS2811":       b"\x03",
+                    "DIFF_ENC_WS2811":  b"\x04",
+                    "SERVO_CFG":        b"\x05",
+                    "GPIO_CFG":         b"\x06",
+                    "GPIO_LISTEN":      b"\x07",
+                    "I2C_XFER":         b"\x08",
+                    "UART_CONFIG":      b"\x09",
+                    "UART_TX":          b"\x0A",
+                    "HALF_DUPLEX":      b"\x0B",
+                    "SET_NVM_BLOCK":    b"\x0C" }
+
+NVM_BLOCK_E = {"HW_REV_BLOCK_ID": 0, "SERIAL_BLOCK_ID": 1,
+               "SETTINGS_BLOCK_ID": 2, "DEV_NAME_BLOCK_ID": 3,
+               "ADV_DATA_BLOCK_ID": 4, "SCAN_RESP_BLOCK_ID": 5}
 
 I2C_BAUD = {"100kHz": 0, "250kHz": 1, "400kHz": 2}
 
@@ -45,8 +50,8 @@ PORT_PIN_E = {"Port A Pin 0": 16, "Port A Pin 1": 17, "Port A Pin 2": 18, "Port 
               "Port D Pin 0": 64, "Port D Pin 1": 65, "Port D Pin 2": 66, "Port D Pin 3": 67, "Port D Pin 4": 68, "Port D Pin 5": 69,
               "Debug Pin 0": 80, "Debug Pin 1": 81, "3V3 Enable": 82, "Main Power Enable": 83, "Charge Enable": 84, "Port Invalid": 255}
 
-PIN_CFG_E = {"PIN_INPUT_NOPULL": 0, "PIN_INPUT_PULLUP": 1, "PIN_INPUT_PULLDOWN": 2, "PIN_OUTPUT_HIGH": 3, "PIN_OUTPUT_LOW": 4,
-                  "PIN_OUTPUT_HIGH_OPEN": 4, "PIN_OUTPUT_LOW_OPEN": 5, "PIN_RESET_DEFAULT": 255 }
+PIN_CFG_E = {"INPUT_NOPULL": 0, "INPUT_PULLUP": 1, "INPUT_PULLDOWN": 2, "OUTPUT_HIGH": 3, "OUTPUT_LOW": 4,
+                  "OUTPUT_HIGH_OPEN": 4, "OUTPUT_LOW_OPEN": 5, "RESET_DEFAULT": 255 }
 
 TX_POWER_E = {"-30dBm": -30, "-20dBm": -20, "-16dBm": -16, "-12dBm": -12, "-8dBm": -8, "-4dBm": -4, "0dBm": 0, "4dBm": 4 }
 
@@ -120,16 +125,19 @@ class AbstractBaseBluemo(ProcedureManager):
         self.send_command(BLUEMO_CMD_CODES["I2C_TRANSACTION"], data, None)
 
     def servo_cfg(self, port_pin, pulse_width):
-        data = bytes(port_pin) + to_little_endian(pulse_width, 2)
+        data = struct.pack("<BH", port_pin, pulse_width)
         self.send_command(BLUEMO_CMD_CODES["SERVO_CFG"], data, None)
 
     def gpio_cfg(self, port_pin, config):
-        data = bytes(port_pin) + bytes(config)
+        data = struct.pack("<BB", port_pin, config)
         self.send_command(BLUEMO_CMD_CODES["GPIO_CFG"], data, None)
 
-    def read_gpio_in(self, periodicity=0):
-        data = bytes(periodicity)
-        self.send_command(BLUEMO_CMD_CODES["READ_GPIO_IN"], data, None)
+    def gpio_listen(self, port_pin, change_listen=True):
+        if change_listen:
+            data = struct.pack("<BB", port_pin, 1)
+        else:
+            data = struct.pack("<BB", port_pin, 0)
+        self.send_command(BLUEMO_CMD_CODES["GPIO_LISTEN"], data, None)
 
     def uart_config(self, speed, tx_pin, rx_pin, rts_pin=0xFF, cts_pin=0xFF):
         data = bytes(speed) + bytes(tx_pin) + bytes(rx_pin) + bytes(rts_pin) + bytes(cts_pin)
@@ -150,18 +158,14 @@ class AbstractBaseBluemo(ProcedureManager):
         data = struct.pack('<BBBB', pin, offset & 0xFF, length & 0xFF,((offset >> 4) & 0xF0) | ((length >> 8) & 0x0F)) + color
         self.send_command(BLUEMO_CMD_CODES["DIFF_ENC_WS2811"], data, None)
 
-    def adv_config(self, adv_mode, adv_interval, tx_power, persist_config, device_name):
-        data = bytes(adv_mode) + to_little_endian(adv_interval, 2) + bytes(tx_power) + bytes(0) + device_name
-        self.send_command(BLUEMO_CMD_CODES["ADV_CONFIG"], data, None)
+    def set_nvm_block(self, block_id, block_data):
+        data = struct.pack("<BB", block_id, len(block_data)) + block_data
+        self.send_command(BLUEMO_CMD_CODES["SET_NVM_BLOCK"], data, None)
 
     def pwr_ctrl(self, pwr_3v3_enable=0, pwr_3v3_disable=0, pwr_main_enable=0, pwr_main_disable=0,
                  pwr_3v3_off_disconnect_enable=0, pwr_3v3_off_disconnect_disable=0,
                  pwr_main_off_disconnect_enable=0, pwr_main_off_disconnect_disable=0,
                  chrg_enable=0, chrg_disable=0, chrg_rate=0, overheat_protect_enable=0, overheat_protect_disable=0):
-        data = bytes(pwr_3v3_enable) + bytes(pwr_3v3_disable) + bytes(pwr_main_enable) + bytes(pwr_main_disable) + \
-            bytes(pwr_3v3_off_disconnect_enable) + bytes(pwr_3v3_off_disconnect_disable) + bytes(pwr_main_off_disconnect_enable) + \
-            bytes(pwr_main_off_disconnect_disable) + bytes(chrg_enable) + bytes(chrg_disable) + bytes(chrg_rate) + \
-            bytes(overheat_protect_enable) + bytes(overheat_protect_disable)
         data = struct.pack('<'+'B'*14, pwr_3v3_enable, pwr_3v3_disable, pwr_main_enable, pwr_main_disable,
                            pwr_3v3_off_disconnect_enable, pwr_3v3_off_disconnect_disable, pwr_main_off_disconnect_enable,
                            pwr_main_off_disconnect_enable, pwr_main_off_disconnect_disable, chrg_enable, chrg_disable, chrg_rate,
@@ -185,7 +189,7 @@ class BluemoBLE(AbstractBaseBluemo):
         for i in range(full_packets):
             logger.log(logging.INFO, "=>" + "".join(["%02X" % j for j in data[20*i:20*(i+1)]]))
             self.write_wo_response(self.serial_char_handle, data[20*i:20*(i+1)], attempts=3)
-            time.sleep(0.01)
+            #time.sleep(0.01)
         if (len(data) % 20) > 0:
             logger.log(logging.INFO, "=>" + "".join(["%02X" % j for j in data[20*full_packets:]]))
             self.write_wo_response(self.serial_char_handle, data[20*full_packets:], attempts=3)
@@ -242,19 +246,6 @@ def main():
     time.sleep(10)
     client.disconnect(0)
 
-'''
-    for j in range(10):
-        #bluemo.set_ws2811(PORT_PIN_E["Port 2 Pin 1"], length=10, rotate_speed=1, dim_speed=10, rgb_values="".join([(bytes(random.randint(0,255)) + bytes(random.randint(0,255)) + bytes(random.randint(0,255))) for i in range(300)]))
-        bluemo.set_ws2811(PORT_PIN_E["Port 2 Pin 0"], length=24, rotate_speed=1, dim_speed=5, rgb_values="".join(["\xFF\x00\x00" for i in range(10)]))
-        time.sleep(1)
-        bluemo.set_ws2811(PORT_PIN_E["Port 2 Pin 0"], length=24, rotate_speed=1, dim_speed=5, rgb_values="".join(["\x00\xFF\x00" for i in range(10)]))
-        time.sleep(1)
-        bluemo.set_ws2811(PORT_PIN_E["Port 2 Pin 0"], length=24, rotate_speed=1, dim_speed=5, rgb_values="".join(["\x00\x00\xFF" for i in range(10)]))
-        time.sleep(1)
-
-    time.sleep(1)
-    client.disconnect(0)
-'''
 
 if __name__ == "__main__":
     main()

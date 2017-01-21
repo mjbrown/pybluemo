@@ -1,2 +1,2 @@
-COM_PORT = "COM9"
-DEVICE_NAME = b"Bluemo"
+COM_PORT = "COM3"
+DEVICE_NAME = b"Bluemo 01"
