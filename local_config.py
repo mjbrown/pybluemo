@@ -1,2 +1,0 @@
-COM_PORT = "COM3"
-DEVICE_NAME = b"Bluemo 01"
