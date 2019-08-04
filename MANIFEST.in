@@ -1,0 +1,4 @@
+# Additional files to include with sdist
+include README.md
+include requirements.txt
+include yasp_specification.json

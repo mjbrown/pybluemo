@@ -1,0 +1,1193 @@
+{
+  "ProtocolVersion": "0.1",
+  "Messages": [
+    {
+      "Name": "Error",
+      "Command": [
+        {
+          "Name": "Message",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Report an error that occurred during command processing.",
+      "Response": [
+        {
+          "Name": "Message",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "DeviceConfig",
+      "Command": [
+        {
+          "Name": "Modify",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "BatteryType",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "HardwareRevision",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "SerialNumber",
+          "Type": "uint32_t",
+          "Default": 0
+        },
+        {
+          "Name": "DeviceName",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Device specific configration stored in non-volatile memory.",
+      "Response": [
+        {
+          "Name": "BatteryType",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "HardwareRevision",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "SerialNumber",
+          "Type": "uint32_t"
+        },
+        {
+          "Name": "DeviceName",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "SoftReset",
+      "Command": [],
+      "Description": "Soft reset the device.",
+      "Response": []
+    },
+    {
+      "Name": "Loopback",
+      "Command": [
+        {
+          "Name": "Handle",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Payload",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Response is the exact payload and handle received.",
+      "Response": [
+        {
+          "Name": "Handle",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Payload",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "BatteryStatus",
+      "Command": [
+        {
+          "Name": "OtgEnable",
+          "Type": "uint8_t",
+          "Description": "Set greater than zero to ENABLE OTG power. Set to zero for no effect.",
+          "Default": 0
+        },
+        {
+          "Name": "OtgDisable",
+          "Type": "uint8_t",
+          "Description": "Set greater than zero to DISABLE OTG power. Set to zero for no effect.",
+          "Default": 0
+        },
+        {
+          "Name": "ChargingEnable",
+          "Type": "uint8_t",
+          "Description": "Set greater than zero to ENABLE battery charging. Set to zero for no effect.",
+          "Default": 0
+        },
+        {
+          "Name": "ChargingDisable",
+          "Type": "uint8_t",
+          "Description": "Set greater than zero to DISABLE battery charging. Set to zero for no effect.",
+          "Default": 0
+        }
+      ],
+      "Description": "Control and monitoring of battery information.",
+      "Response": [
+        {
+          "Name": "OtgEnableStatus",
+          "Type": "uint8_t",
+          "Description": "Greater than zero if OTG is enabled."
+        },
+        {
+          "Name": "ChargingEnableStatus",
+          "Type": "uint8_t",
+          "Description": "Greater than zero if charging is enabled."
+        },
+        {
+          "Name": "BatteryVoltage",
+          "Type": "uint8_t",
+          "Description": "Actual Voltage = (BatteryVoltage * 20mV) + 2.304V"
+        },
+        {
+          "Name": "SystemVoltage",
+          "Type": "uint8_t",
+          "Description": "Actual Voltage = (SystemVoltage * 20mV) + 2.304V"
+        },
+        {
+          "Name": "UsbBusVoltage",
+          "Type": "uint8_t",
+          "Description": "Actual Voltage = (UsbBusVoltage * 100mV) + 2.6V"
+        },
+        {
+          "Name": "ChargeCurrent",
+          "Type": "uint8_t",
+          "Description": "Actual Current = (ChargeCurrent * 50mA) + 0A"
+        }
+      ]
+    },
+    {
+      "Name": "DetectModule",
+      "Command": [
+        {
+          "Name": "Module",
+          "Type": "uint8_t"
+        }
+      ],
+      "Description": "Attempt pin detection on the specified port.",
+      "Response": [
+        {
+          "Name": "Module",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DetectResult",
+          "Type": "int16_t"
+        }
+      ]
+    },
+    {
+      "Name": "FlashErase",
+      "Command": [
+        {
+          "Name": "Address",
+          "Type": "uint32_t",
+          "Description": "Must be a multiple of 4096 (Sector). Multiples of 32k will erase faster (Block)."
+        },
+        {
+          "Name": "Length",
+          "Type": "uint32_t"
+        }
+      ],
+      "Description": "Flash must be erased to change the bit values from zero to one.",
+      "Response": [
+        {
+          "Name": "Address",
+          "Type": "uint32_t",
+          "Description": "Response is identical to the command."
+        },
+        {
+          "Name": "Length",
+          "Type": "uint32_t"
+        }
+      ]
+    },
+    {
+      "Name": "FlashRead",
+      "Command": [
+        {
+          "Name": "Address",
+          "Type": "uint32_t"
+        },
+        {
+          "Name": "Length",
+          "Type": "uint32_t",
+          "Description": "Maximum read length is 256."
+        }
+      ],
+      "Description": "Read from attached flash.",
+      "Response": [
+        {
+          "Name": "Address",
+          "Type": "uint32_t"
+        },
+        {
+          "Name": "Data",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "FlashWrite",
+      "Command": [
+        {
+          "Name": "Address",
+          "Type": "uint32_t"
+        },
+        {
+          "Name": "Data",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Write to attached flash.",
+      "Response": [
+        {
+          "Name": "Address",
+          "Type": "uint32_t"
+        },
+        {
+          "Name": "Length",
+          "Type": "uint32_t"
+        }
+      ]
+    },
+    {
+      "Name": "FlashInit",
+      "Command": [
+        {
+          "Name": "ChipSelectPin",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "MosiPin",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "MisoPin",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "SckPin",
+          "Type": "uint8_t"
+        }
+      ],
+      "Description": "Initialize connected SPI flash, or read configuration if already initialized.",
+      "Response": [
+        {
+          "Name": "FlashDeviceInfo",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "FlashDisconnect",
+      "Command": [],
+      "Description": "Uninitialize SPI flash.",
+      "Response": []
+    },
+    {
+      "Name": "TwimScan",
+      "Command": [
+        {
+          "Name": "TestByte",
+          "Type": "uint8_t",
+          "Description": "Byte of data used to attempt an I2C write."
+        }
+      ],
+      "Description": "Scan the I2C bus for devices by attempting a single byte write.  Each success is returned in an individual response message, SlaveAddress=0xFF indicates the scan is complete.",
+      "Response": [
+        {
+          "Name": "SlaveAddress",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "TotalFound",
+          "Type": "uint8_t"
+        }
+      ]
+    },
+    {
+      "Name": "TwimTransfer",
+      "Command": [
+        {
+          "Name": "OpHandle",
+          "Type": "uint8_t",
+          "Description": "Software specified operation handle copied by firmware to the response message"
+        },
+        {
+          "Name": "SlaveAddress",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ReadLength",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "WriteData",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Execute a write-then-read on the already initialized TWIM bus.",
+      "Response": [
+        {
+          "Name": "OpHandle",
+          "Type": "uint8_t",
+          "Description": "Copy of OpHandle provided in command packet."
+        },
+        {
+          "Name": "ActualWriteLength",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "ActualReadData",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "LedConfig",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "SaveConfig",
+          "Type": "uint8_t",
+          "Description": "0: Read Configuration, 1: Set configuration in RAM, 2: Save configuration to persistent storage.",
+          "Default": 0
+        },
+        {
+          "Name": "LedLength",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "AnimationRate",
+          "Type": "uint8_t",
+          "Description": "~2Hz per increment, 0 turns animation off."
+        },
+        {
+          "Name": "AnimationType",
+          "Type": "uint8_t",
+          "Description": "0: Fixed, 1: Rotation, 2: Frame by Frame"
+        },
+        {
+          "Name": "FrameData",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Control a strip of WS2812 LEDs on a single data pin.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "LedLength",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "AnimationRate",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "AnimationType",
+          "Type": "uint8_t"
+        }
+      ]
+    },
+    {
+      "Name": "LedPattern",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Offset",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "FrameData",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Stored LED patterns for display on an LED strip.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "FrameData",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "PinFunction",
+      "Command": [
+        {
+          "Name": "Module",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PinIndex",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "SaveConfig",
+          "Type": "uint8_t",
+          "Description": "0: Read only, 1: Modify in RAM, 2: Modify in RAM and Flash",
+          "Default": 0
+        },
+        {
+          "Name": "Function",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Instance",
+          "Type": "uint8_t",
+          "Default": 255
+        }
+      ],
+      "Description": "Assign a pin to a specific function.",
+      "Response": [
+        {
+          "Name": "Module",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PinIndex",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Function",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        }
+      ]
+    },
+    {
+      "Name": "PinControl",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "SaveConfig",
+          "Type": "uint8_t",
+          "Default": 0,
+          "Description": "0: Read configuration, 1: Modify in RAM, 2: Modify in RAM and flash (and save name)."
+        },
+        {
+          "Name": "DriveConfig",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "OutputState",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "PinControlName",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Control the output value of a pin.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DriveConfig",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "OutputState",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PinControlName",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "PinMonitor",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "SaveConfig",
+          "Type": "uint8_t",
+          "Default": 0,
+          "Description": "0: Read configuration, 1: Modify in RAM, 2: Modify in RAM and flash (and save name)."
+        },
+        {
+          "Name": "PullConfig",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "SenseConfig",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "PinMonitorName",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Configure and monitor an input pin.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PullConfig",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "SenseConfig",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PinStatus",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PinMonitorName",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "RobotisConfig",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ServoId",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ServoName",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Set and read servo names",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ServoId",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ServoName",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "RobotisCommand",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ServoId",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Instruction",
+          "Type": "uint8_t",
+          "Description": "1:Ping, 2:Read, 3:Write, 4:RegWrite, 5:Action, 6:FactoryReset, 7:Reboot, 8:SyncWrite, 9:BulkRead"
+        },
+        {
+          "Name": "Parameters",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "AX-12 command sent over UART.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "BytesSent",
+          "Type": "uint32_t"
+        },
+        {
+          "Name": "ResponseServoId",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ResponseErrorStatus",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ResponseParameters",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "ServoConfig",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PwmLowLimit",
+          "Type": "uint16_t",
+          "Default": 600
+        },
+        {
+          "Name": "PwmHighLimit",
+          "Type": "uint16_t",
+          "Default": 2500
+        },
+        {
+          "Name": "DownSpeedLimit",
+          "Type": "uint16_t",
+          "Default": 1900
+        },
+        {
+          "Name": "UpSpeedLimit",
+          "Type": "uint16_t",
+          "Default": 1900
+        },
+        {
+          "Name": "ServoName",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Configuration information for a specific servo channel.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PwmLowLimit",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "PwmHighLimit",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "DownSpeedLimit",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "UpSpeedLimit",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "ServoName",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "ServoControl",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t",
+          "Description": "There are 8 channels per module, 0b000 through 0b111."
+        },
+        {
+          "Name": "PulseWidth",
+          "Type": "uint16_t",
+          "Description": "Microseconds."
+        },
+        {
+          "Name": "MoveSpeed",
+          "Type": "uint16_t",
+          "Default": 1900,
+          "Description": "Maximum change per 20ms from the current pulse width."
+        }
+      ],
+      "Description": "Initiate a continuous PWM signal of the specified pulse width at 50Hz.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "PulseWidth",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "MoveSpeed",
+          "Type": "uint16_t"
+        }
+      ]
+    },
+    {
+      "Name": "AccelStream",
+      "Command": [
+        {
+          "Name": "DataRange",
+          "Type": "uint8_t",
+          "Description": "0: 4g, 1: 8g, 2: 16g, 3: 32g"
+        },
+        {
+          "Name": "DataRate",
+          "Type": "uint8_t",
+          "Description": "In Hertz - 0: Off, 1: 7.81, 2: 15.63, 3: 31.25, 4: 62.5, 5: 125, 6: 250, 7: 500"
+        },
+        {
+          "Name": "Watermark",
+          "Type": "uint8_t"
+        }
+      ],
+      "Response": [
+        {
+          "Name": "DataRateAndRange",
+          "Type": "uint8_t",
+          "Description": "Range is in the most significant nibble."
+        },
+        {
+          "Name": "AccelData",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "GyroStream",
+      "Command": [
+        {
+          "Name": "DataRange",
+          "Type": "uint8_t",
+          "Description": "In degrees per second: 0: 2000, 1: 1000, 2: 500, 3: 250, 4: 125"
+        },
+        {
+          "Name": "DataRate",
+          "Type": "uint8_t",
+          "Description": "In Hertz - 0: Off, 1: 25, 2: 50, 3: 100, 4: 200, 5: 400, 6: 800, 7: 1600, 8: 3200"
+        },
+        {
+          "Name": "Watermark",
+          "Type": "uint16_t",
+          "Description": "Samples between transmit (6 bytes per sample)"
+        }
+      ],
+      "Description": "Stream gyroscope data.",
+      "Response": [
+        {
+          "Name": "DataRateAndRange",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "GyroData",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "MotorConfig",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "MinDutyCycle",
+          "Type": "uint16_t",
+          "Default": -32767
+        },
+        {
+          "Name": "MaxDutyCycle",
+          "Type": "uint16_t",
+          "Default": 32767
+        },
+        {
+          "Name": "MotorName",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Motor channel configuration.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "MinDutyCycle",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "MaxDutyCycle",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "MotorName",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "MotorControl",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DutyCycle",
+          "Type": "uint16_t",
+          "Description": "Most significant bit controls direction."
+        }
+      ],
+      "Description": "Set the duty cycle and direction.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DutyCycle",
+          "Type": "uint16_t"
+        }
+      ]
+    },
+    {
+      "Name": "GpioExpanderConfig",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "InputEnabled",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "OutputEnabled",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "OutputDefault",
+          "Type": "uint8_t",
+          "Default": 0
+        },
+        {
+          "Name": "ChannelName",
+          "Type": "uint8_t *"
+        }
+      ],
+      "Description": "Control input/output direction.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "InputEnabled",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "OutputEnabled",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "OutputDefault",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "ChannelName",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "GpioExpanderControl",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "OutputValue",
+          "Type": "uint8_t"
+        }
+      ],
+      "Description": "Control output pins and/or read input pins.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "CurrentValue",
+          "Type": "uint8_t"
+        }
+      ]
+    },
+    {
+      "Name": "AnalogDataStream",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t",
+          "Description": "0 - Diff 0/1, 1 - Diff 0/3, 2 - Diff 1/3, 3 - Diff 2/3, 4 - 0 only, 5 - 1 only, 6 - 2 only, 7 - 3 only"
+        },
+        {
+          "Name": "DataRate",
+          "Type": "uint8_t",
+          "Description": "Set to zero to disable. Set to 1 for a single reading. Otherwise: 2=8sps, 3=16sps, 4=32sps, 5=64sps, 6=128sps, 7=250sps, 8=475sps, 9=860sps."
+        },
+        {
+          "Name": "DataRange",
+          "Type": "uint8_t",
+          "Description": "Programmable gain on GPIO expander, 0 - FSR 2.048V, 1 - FSR 1.024V, 2 - FSR 0.512V, 3 - FSR 0.256V"
+        },
+        {
+          "Name": "Watermark",
+          "Type": "uint16_t",
+          "Description": "Number of samples to collect before sending data."
+        }
+      ],
+      "Description": "Stream analog voltage readings.",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Channel",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DataRate",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DataRange",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "AnalogData",
+          "Type": "uint8_t *"
+        }
+      ]
+    },
+    {
+      "Name": "ResourceConfiguration",
+      "Command": [
+        {
+          "Name": "RestorePinConfig",
+          "Type": "uint8_t"
+        }
+      ],
+      "Description": "Read and modify firmware resource allocation. Also reads all currently configured pin functions.",
+      "Response": [
+        {
+          "Name": "Modules",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "LedInstances",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "LedLengthMax",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "LedPatternMaxBytes",
+          "Type": "uint16_t"
+        },
+        {
+          "Name": "ServoInstances",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "MotorInstances",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "IoExpanderInstances",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "RobotisInstances",
+          "Type": "uint8_t"
+        }
+      ]
+    },
+    {
+      "Name": "StartOrientation",
+      "Command": [
+        {
+          "Name": "GyroRate",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "GyroRange",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "GyroWatermark",
+          "Type": "uint8_t"
+        }
+      ],
+      "Description": "Stream inertial measurement quaternion, initializes rotation to zero and direction based upon acceleration(gravity).",
+      "Response": [
+        {
+          "Name": "GyroRate",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "GyroRange",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "GyroWatermark",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Qw",
+          "Type": "float"
+        },
+        {
+          "Name": "Qx",
+          "Type": "float"
+        },
+        {
+          "Name": "Qy",
+          "Type": "float"
+        },
+        {
+          "Name": "Qz",
+          "Type": "float"
+        }
+      ]
+    },
+    {
+      "Name": "AnalogInput",
+      "Command": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "SaveConfig",
+          "Type": "uint8_t",
+          "Default": 1
+        },
+        {
+          "Name": "DataRate",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DataRange",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Watermark",
+          "Type": "uint8_t"
+        }
+      ],
+      "Description": "Use the built-in ADC capabilities to stream analog voltage measurements",
+      "Response": [
+        {
+          "Name": "Instance",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DataRate",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "DataRange",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "Watermark",
+          "Type": "uint8_t"
+        },
+        {
+          "Name": "AdcData",
+          "Type": "uint8_t *"
+        }
+      ]
+    }
+  ]
+}
