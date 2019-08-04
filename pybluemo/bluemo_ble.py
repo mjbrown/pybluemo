@@ -2,14 +2,14 @@ import logging
 import sys
 from abc import ABCMeta, abstractmethod
 import time
-import thread
+import threading
 from threading import Semaphore
 
 from bgapi.module import BlueGigaClient, GATTService, GATTCharacteristic
 from bgapi.module import BlueGigaServer, ProcedureManager, BLEScanResponse
 from bgapi.cmd_def import gap_discover_mode, connection_status_mask
 
-from bluemo_msg import *
+from pybluemo.bluemo_msg import *
 
 term = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -42,26 +42,26 @@ class AbstractBaseYasp(ProcedureManager):
     def serial_tx(self, data): raise NotImplementedError()
 
     def serial_rx(self, data):
-        logger.log(logging.DEBUG, "<=" + "".join(["%02X" % ord(j) for j in data]))
+        logger.log(logging.DEBUG, "<=" + "".join(["%02X" % j for j in data]))
         self.buffer += data
         self.rx_processing()
 
     def rx_processing(self):
         if len(self.buffer) > 1:
             hdr_len = 2
-            length = ord(self.buffer[0])
+            length = self.buffer[0]
             if length > 127:
                 if len(self.buffer) > hdr_len:
-                    length = (ord(self.buffer[0]) & 0x7F) + ((ord(self.buffer[1]) & 0xF) << 7)
+                    length = (self.buffer[0] & 0x7F) + ((self.buffer[1] & 0xF) << 7)
                     if self.buffer[1] > 0xF:
                         logger.error("RX Overrun, packets dropped.")
                     hdr_len += 1
                 else:
                     return
             if len(self.buffer) >= hdr_len + length:
-                cmd = ord(self.buffer[hdr_len-1])
+                cmd = self.buffer[hdr_len-1]
                 message = self.buffer[hdr_len:hdr_len+length]
-                thread.start_new_thread(self.cmd_handler, (cmd, message))
+                threading.Thread(target=self.cmd_handler, args=(cmd, message)).start()
                 self.buffer = self.buffer[hdr_len+length:]
                 self.rx_processing()
 
@@ -99,7 +99,7 @@ class AbstractBaseYasp(ProcedureManager):
 class YaspClient(AbstractBaseYasp):
     def __init__(self):
         super(YaspClient, self).__init__()
-        for key, value in MSG_CLASS_BY_RSP_CODE.iteritems():
+        for key, value in MSG_CLASS_BY_RSP_CODE.items():
             self.cmd_callbacks[key] = []
         self.serial_char_handle = None
         self.write_wo_response = None
@@ -115,10 +115,10 @@ class YaspClient(AbstractBaseYasp):
             raise RuntimeError()
         full_packets = int(len(data) / YASP_BLE_MTU)
         for i in range(full_packets):
-            logger.log(logging.DEBUG, "=>"+"".join(["%02X" % ord(j) for j in data[YASP_BLE_MTU*i:YASP_BLE_MTU*(i+1)]]))
+            logger.log(logging.DEBUG, "=>"+"".join(["%02X" % j for j in data[YASP_BLE_MTU*i:YASP_BLE_MTU*(i+1)]]))
             self.write_wo_response(self.serial_char_handle, data[YASP_BLE_MTU*i:YASP_BLE_MTU*(i+1)], attempts=3)
         if (len(data) % YASP_BLE_MTU) > 0:
-            logger.log(logging.DEBUG, "=>" + "".join(["%02X" % ord(j) for j in data[YASP_BLE_MTU*full_packets:]]))
+            logger.log(logging.DEBUG, "=>" + "".join(["%02X" % j for j in data[YASP_BLE_MTU*full_packets:]]))
             self.write_wo_response(self.serial_char_handle, data[YASP_BLE_MTU*full_packets:], attempts=3)
 
     def cmd_handler(self, cmd, payload):
@@ -155,11 +155,11 @@ class YaspServer(AbstractBaseYasp):
         full_packets = int(len(data) / YASP_BLE_MTU)
         for i in range(full_packets):
             chunk = data[YASP_BLE_MTU*i:YASP_BLE_MTU*(i+1)]
-            logger.log(logging.DEBUG, "=>" + "".join(["%02X" % ord(j) for j in chunk]))
+            logger.log(logging.DEBUG, "=>" + "".join(["%02X" % j for j in chunk]))
             self.write_attribute(self.serial_char_handle, offset=0, value=chunk, timeout=1)
         if (len(data) % YASP_BLE_MTU) > 0:
             chunk = data[YASP_BLE_MTU*full_packets:]
-            logger.log(logging.DEBUG, "=>" + "".join(["%02X" % ord(j) for j in chunk]))
+            logger.log(logging.DEBUG, "=>" + "".join(["%02X" % j for j in chunk]))
 
 
 class YaspBlueGigaClient(BlueGigaClient):
@@ -179,7 +179,7 @@ class YaspBlueGigaClient(BlueGigaClient):
             now = time.time()
         self._api.ble_cmd_gap_end_procedure()
         if self.scan_filter_result is not None:
-            logger.log(logging.INFO, "Intiating connection to %s" % ":".join(["%02X" % ord(i) for i in self.scan_filter_result.sender[::-1]]))
+            logger.log(logging.INFO, "Intiating connection to %s" % ":".join(["%02X" % i for i in self.scan_filter_result.sender[::-1]]))
             connection = self.connect(self.scan_filter_result, scan_timeout, conn_interval_min,
                                       conn_interval_max, connection_timeout, latency)
             logger.log(logging.INFO, "Connected.")
@@ -207,6 +207,7 @@ class YaspBlueGigaClient(BlueGigaClient):
     def ble_evt_gap_scan_response(self, rssi, packet_type, sender, address_type, bond, data):
         super(YaspBlueGigaClient, self).ble_evt_gap_scan_response(rssi, packet_type, sender, address_type, bond, data)
         result = BLEScanResponse(rssi, packet_type, sender, address_type, bond, data)
+        print("Advertisement data: " + "".join(["%c" % i for i in data]))
         if self.scan_filter_name is not None and self.scan_filter_service is not None:
             if self.scan_filter_name in data and self.scan_filter_service in data:
                 self.scan_filter_result = result

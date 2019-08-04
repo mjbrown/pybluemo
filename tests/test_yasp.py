@@ -7,7 +7,7 @@ from asyncio import Semaphore
 
 loop_semaphore = Semaphore(2)
 
-DEVICE_NAME = "Bluemo02"
+DEVICE_NAME = b"Bluemo01"
 
 
 def cb_error(msg_defn):
@@ -357,7 +357,7 @@ def test_read_pin_monitor(yasp_client):
 
 
 def main():
-    client = YaspBlueGigaClient(port="COM9")
+    client = YaspBlueGigaClient(port="COM7")
     client.reset_ble_state()
     client.pipe_logs_to_terminal(level=logging.INFO)
     yasp_client = YaspClient()

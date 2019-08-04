@@ -1,4 +1,4 @@
-from bluemo_spec import *
+from pybluemo.bluemo_spec import *
 import struct
 
 
