@@ -36,14 +36,14 @@ def get_long_description():
 setup(
   name='pybluemo',
   packages=['pybluemo'],
-  version='0.3',
+  version='0.4',
   description='Interface library for the Bluemo Bluetooth motion controller.',
   long_description=get_long_description(),
   url='https://github.com/mjbrown/pybluemo',
   author="Michael Brown",
   author_email="mjbrown.droid@gmail.com",
   install_requires=open('requirements.txt').read().split(),
-  data_files=[('specification', ['pybluemo/yasp_specification.json'])],
+  include_package_data=True,
   classifiers=[
       "Development Status :: 3 - Alpha",
       "Intended Audience :: Developers",
