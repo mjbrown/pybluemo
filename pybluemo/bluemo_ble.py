@@ -122,7 +122,6 @@ class YaspClient(AbstractBaseYasp):
             self.write_wo_response(self.serial_char_handle, data[YASP_BLE_MTU*full_packets:], attempts=3)
 
     def cmd_handler(self, cmd, payload):
-        #logger.log(logging.INFO, "Response received: %02x - " % cmd + "".join(["%02X" % ord(j) for j in payload]))
         if cmd not in MSG_CLASS_BY_RSP_CODE:
             raise RuntimeError()
         response = MSG_CLASS_BY_RSP_CODE[cmd].rsp_recv(payload)

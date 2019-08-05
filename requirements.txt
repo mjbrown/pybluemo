@@ -1,0 +1,2 @@
+bgapi==0.7
+pyserial==3.4
