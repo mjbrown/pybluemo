@@ -1,4 +1,5 @@
 import json
+import os
 
 MSGS = "Messages"
 MSG_NAME = "Name"
@@ -12,7 +13,7 @@ MSG_PARAM_TYPE = "Type"
 MSG_PARAM_DESC = "Description"
 MSG_PARAM_DEFAULT = "Default"
 
-with open("../yasp_specification.json", "r") as _yasp_fp:
+with open(os.path.dirname(__file__) + "/yasp_specification.json", "r") as _yasp_fp:
     PROTOCOL_JSON = json.load(_yasp_fp)
     PROTOCOL_VERSION = PROTOCOL_JSON["ProtocolVersion"]
     MESSAGES = PROTOCOL_JSON[MSGS]
