@@ -69,8 +69,10 @@ class AbstractBaseYasp(ProcedureManager):
         payload = msg_defn.cmd_msg()
         if len(payload) > 0x7F:
             msg = struct.pack("<BBB%ds" % len(payload), (len(payload) & 0x7F) | 0x80, len(payload) >> 7, msg_defn.get_command_code(), payload)
-        else:
+        elif len(payload) > 0:
             msg = struct.pack("<BB%ds" % len(payload), len(payload), msg_defn.get_command_code(), payload)
+        else:
+            msg = struct.pack("<BB", len(payload), msg_defn.get_command_code())
         if callback is not None:
             if msg_defn.get_response_code() not in self.cmd_callbacks:
                 self.cmd_callbacks[msg_defn.get_response_code()] = []
