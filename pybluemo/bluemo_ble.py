@@ -37,13 +37,16 @@ class AbstractBaseYasp(ProcedureManager):
         self.cached_response = None
         self.cmd_callbacks = {}
         self.def_callbacks = {}
+        self.buffer_lock = threading.Semaphore(1)
 
     @abstractmethod
     def serial_tx(self, data): raise NotImplementedError()
 
     def serial_rx(self, data):
         logger.log(logging.DEBUG, "<=" + "".join(["%02X" % j for j in data]))
+        self.buffer_lock.acquire(True)
         self.buffer += data
+        self.buffer_lock.release()
         self.rx_processing()
 
     def rx_processing(self):
@@ -62,7 +65,9 @@ class AbstractBaseYasp(ProcedureManager):
                 cmd = self.buffer[hdr_len-1]
                 message = self.buffer[hdr_len:hdr_len+length]
                 threading.Thread(target=self.cmd_handler, args=(cmd, message)).start()
+                self.buffer_lock.acquire(True)
                 self.buffer = self.buffer[hdr_len+length:]
+                self.buffer_lock.release()
                 self.rx_processing()
 
     def send_command(self, callback, msg_defn=MessageDefinition()):
