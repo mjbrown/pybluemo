@@ -36,7 +36,7 @@ def get_long_description():
 setup(
   name='pybluemo',
   packages=['pybluemo'],
-  version='0.4',
+  version='0.5',
   description='Interface library for the Bluemo Bluetooth motion controller.',
   long_description=get_long_description(),
   url='https://github.com/mjbrown/pybluemo',
