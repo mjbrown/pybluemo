@@ -383,16 +383,16 @@ class MsgPinConfig(MessageDefinition):
 class MsgPinControl(MessageDefinition):
     _MSG_NAME = "PinControl"
     _CMD_CODE = 5
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'DriveConfig', 'Type': 'uint8_t', 'Default': 0}, {'Name': 'OutputState', 'Type': 'uint8_t', 'Default': 0}, {'Name': 'PinControlName', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'DriveStrength', 'Type': 'uint8_t', 'Enum': 'DriveStrength', 'Default': 0}, {'Name': 'OutputState', 'Type': 'uint8_t', 'Default': 0}, {'Name': 'PinControlName', 'Type': 'uint8_t *'}]
     _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'DriveConfig', 'Type': 'uint8_t'}, {'Name': 'OutputState', 'Type': 'uint8_t'}, {'Name': 'PinControlName', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, instance, pin_control_name, modify=0, drive_config=0, output_state=0):
+    def builder(cls, instance, pin_control_name, modify=0, drive_strength=0, output_state=0):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
             "Modify": modify,
-            "DriveConfig": drive_config,
+            "DriveStrength": drive_strength,
             "OutputState": output_state,
             "PinControlName": pin_control_name,
         }
@@ -787,6 +787,26 @@ class MsgAnalogStream(MessageDefinition):
         return msg
 
 
+class MsgRgbRunLenEnc(MessageDefinition):
+    _MSG_NAME = "RgbRunLenEnc"
+    _CMD_CODE = 29
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationPeriodMs', 'Type': 'uint32_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t', 'Description': '0: None, 1: Rotation'}, {'Name': 'Encoding', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationRate', 'Type': 'uint8_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t'}, {'Name': 'Encoding', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, instance, led_length, animation_period_ms, animation_type, encoding, modify=0):
+        msg = cls()
+        msg.parameters = {
+            "Instance": instance,
+            "Modify": modify,
+            "LedLength": led_length,
+            "AnimationPeriodMs": animation_period_ms,
+            "AnimationType": animation_type,
+            "Encoding": encoding,
+        }
+        return msg
+
+
 MSG_CLASS_BY_RSP_CODE = {
     128: MsgError,
     129: MsgDeviceConfig,
@@ -817,4 +837,5 @@ MSG_CLASS_BY_RSP_CODE = {
     154: MsgGyroStream,
     155: MsgAnalogMeasurement,
     156: MsgAnalogStream,
+    157: MsgRgbRunLenEnc,
 }
