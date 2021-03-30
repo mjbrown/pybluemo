@@ -30,6 +30,12 @@ class CreateDataStreamsInput(object):
             "values": values
         }
 
+    def __len__(self):
+        return len(self.params["values"])
+
+    def timedelta(self):
+        return timedelta(seconds=(1 / self.params["frequency"]) * len(self.params["values"]))
+
     def json(self):
         return self.params
 
@@ -114,7 +120,7 @@ query ListCohorts ($filter: ModelCohortFilterInput, $limit: Int, $nextToken: Str
         if next_token is not None:
             variables['nextToken'] = next_token
         result = self.client.execute(query=query, variables=variables)
-        return result['data']
+        return result['data']['listCohorts']
 
     def list_sources(self, query_filter=None, limit=None, next_token=None):
         query = """
@@ -137,7 +143,7 @@ query ListSources($filter: ModelDataSourceFilterInput, $limit: Int, $nextToken: 
         if next_token is not None:
             variables['nextToken'] = next_token
         result = self.client.execute(query=query, variables=variables)
-        return result['data']
+        return result['data']['listDataSources']
 
     def get_or_create_data_sources(self, mutation_input):
         mutation = """
@@ -154,9 +160,9 @@ mutation GetOrCreateDataSources($input: [GetOrCreateDataSourceInput]!) {
     createdAt
   }
 }"""
-        variables = {'input': mutation_input}
+        variables = {'input': [i.json() for i in mutation_input]}
         result = self.client.execute(query=mutation, variables=variables)
-        return result['data']
+        return result['data']['getOrCreateDataSources']
 
     def save_data_stream(self, user_id, device_id, start, end, stream_list, linked_sources=None):
         mutation = """
@@ -185,10 +191,12 @@ mutation SaveDataStreams($userId: ID!, $deviceId: ID!, $start: AWSDateTime!, $en
             'deviceId': device_id,
             'start': start,
             'end': end,
-            'dataStreams': stream_list
+            'dataStreams': [i.json() for i in stream_list]
         }
         if linked_sources is not None:
             variables['linkedSources'] = linked_sources
+        else:
+            variables['linkedSources'] = []
         result = self.client.execute(query=mutation, variables=variables)
         return result['data']['saveDataStreams']
 
@@ -254,3 +262,38 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
         variables = {'userId': user_id, 'sourceId': source_id, 'eventId': event_id}
         result = self.client.execute(query=mutation, variables=variables)
         return result
+
+
+class CloudLogger(object):
+    def __init__(self, user, user_cohort_id, device, sensordb_client):
+        source_list = [GetOrCreateDataSourceInput(user, "User", user_cohort_id),
+            GetOrCreateDataSourceInput(device, "Bluemo")]
+        result = sensordb_client.get_or_create_data_sources(source_list)
+        for source in result:
+            if source['objectKey'] == user:
+                self.user_id = source['id']
+            elif source['objectKey'] == device:
+                self.device_id = source['id']
+            else:
+                raise Exception("Get Source IDs error.")
+        #self.user_id = result[0]['id']
+        #self.device_id = result[1]['id']
+        self.sensordb_client = sensordb_client
+
+    def __str__(self):
+        return "CloudLogger(%s,%s)" % (self.user_id, self.device_id)
+
+    def log_streams(self, streams, start=None, end=None):
+        if end is None:
+            end = datetime.utcnow().isoformat() + "Z"
+        if start is None:
+            start = (datetime.utcnow() - streams[0].timedelta()).isoformat() + "Z"
+        result = self.sensordb_client.save_data_stream(self.user_id, self.device_id, start, end, streams)
+        #print(result)
+        self.sensordb_client.publish_streams(result)
+
+    def log_event(self, label, date_time=None, value=None, unit=None, channel=None):
+        input = CreateDataEventInput(self.user_id, self.device_id, label, date_time, value, unit, channel)
+        result = self.sensordb_client.create_data_event(input)
+        #print(result)
+        self.sensordb_client.publish_event(result['userId'], result['sourceId'], result['id'])

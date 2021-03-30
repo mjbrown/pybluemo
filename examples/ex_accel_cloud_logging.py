@@ -3,16 +3,9 @@ from pybluemo import YaspClient, YaspBlueGigaClient, MSG_CLASS_BY_RSP_CODE
 from pybluemo import MsgAccelEvents, MsgAccelStream, MsgSensorEvent, MsgError
 from pybluemo import EnumAccelDataRange, EnumAccelDataRate
 from pybluemo.sensors import Bma400StreamHandler
+from pybluemo.sensordb import SensorDbClient, CloudLogger
 
 UUT = b"Sense 840"
-
-
-class AccelStreamLogger(Bma400StreamHandler):
-    def parsed_data_ready(self, x, y, z, t):
-        if self.csv_fp is not None:
-            self.csv_fp.write("%s,%f,%f,%f\n" % (t, x, y, z))
-        print("Parsed X:%f Y:%f Z:%f" % (x, y, z))
-
 
 
 def test_accel_events(yasp_client):
@@ -24,9 +17,9 @@ def test_accel_events(yasp_client):
 
 
 def test_accel_stream(yasp_client):
-    resp = yasp_client.send_command(callback=None, msg_defn=MsgAccelStream.builder(EnumAccelDataRange.G8, EnumAccelDataRate.F200, 7*10))
+    resp = yasp_client.send_command(callback=None, msg_defn=MsgAccelStream.builder(EnumAccelDataRange.G8, EnumAccelDataRate.F25, 7*10))
     print(resp)
-    time.sleep(10)
+    time.sleep(60)
     resp = yasp_client.send_command(callback=None, msg_defn=MsgAccelStream.builder(EnumAccelDataRange.G4, EnumAccelDataRate.OFF, 7*10))
     print(resp)
 
@@ -43,9 +36,13 @@ if __name__ == "__main__":
     conn_handle = client.connect_by_name(UUT, yasp_client)
     yasp_client.set_default_msg_callback(MsgError.get_response_code(), error_handler)
 
-    #results = Bma400StreamHandler(yasp_client, "test_bma400.csv")
     time.sleep(0.1)
-    #test_accel_events(yasp_client)
+    addr = "".join(["%X" % i for i in client.connections[conn_handle].address])
+    sensordb_client = SensorDbClient("sensordb_client_config.json")
+    cloud_logger = CloudLogger(user="Test Guy",
+                               user_cohort_id="d7b50a5b-1f43-4c32-9f47-6232d48935f3",
+                               device=addr, sensordb_client=sensordb_client)
+    results = Bma400StreamHandler(yasp_client, "test_bma400.csv", cloud_logger)
     test_accel_stream(yasp_client)
     time.sleep(0.1)
     client.disconnect(conn_handle)

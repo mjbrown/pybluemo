@@ -91,3 +91,5 @@ venv38/
 
 .idea/
 examples/*.csv
+tests/auth_token.json
+examples/auth_token.json
