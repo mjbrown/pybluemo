@@ -29,4 +29,4 @@ class RgbRle(object):
         return self
 
     def get_bytes(self):
-        return self.encoding
+        return b"".join(b"%c" % ord(i) for i in self.encoding)
