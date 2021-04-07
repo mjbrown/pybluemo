@@ -25,16 +25,13 @@ def test_light_strip(yasp_client):
     resp = yasp_client.send_command(callback=None, msg_defn=msg)
     print(resp)
 
-    rle = RgbRle().add_run_length(0, 150, "\x00\x00\x00")\
-                  .add_run_length(0, 20, "\x1F\x00\x00", rle_type=RgbRle.TYPE_ASCENDING)\
-                  .add_run_length(40, 20, "\x00\x1F\x00", rle_type=RgbRle.TYPE_ASCENDING)\
-                  .add_run_length(60, 20, "\x00\x00\x1F", rle_type=RgbRle.TYPE_ASCENDING)
+    rle = RgbRle().add_run_length(0, 156, "\x7F\x00\x00", rle_type=RgbRle.TYPE_UPDOWN)
     msg = MsgPinConfig.builder(24, modify=EnumModify.MODIFY, function=EnumPinFunction.LED_DATA)
     resp = yasp_client.send_command(callback=None, msg_defn=msg)
     print(resp)
 
     inst = resp.get_param("Instance")
-    msg = MsgRgbRunLenEnc.builder(inst, 150, 100000, RgbRle.ANIM_ROTATION, rle.get_bytes(), modify=EnumModify.MODIFY)
+    msg = MsgRgbRunLenEnc.builder(inst, 156, 10000, RgbRle.ANIM_ROTATION, rle.get_bytes(), modify=EnumModify.MODIFY)
     resp = yasp_client.send_command(callback=None, msg_defn=msg)
     print(resp)
 
