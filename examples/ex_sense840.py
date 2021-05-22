@@ -4,6 +4,9 @@ from pybluemo import MsgAccelEvents, MsgAccelStream, MsgSensorEvent, MsgError
 from pybluemo import EnumAccelDataRange, EnumAccelDataRate
 from pybluemo.sensors import Bma400StreamHandler
 
+from pybluemo import MsgSpiFlashInit, MsgSpiFlashRead, MsgSpiFlashDisconnect, MsgSpiFlashWrite, MsgSpiFlashErase
+from pybluemo import EnumSpiFreq, EnumFlashModel
+
 UUT = b"Sense 840"
 
 
@@ -13,6 +16,31 @@ class AccelStreamLogger(Bma400StreamHandler):
             self.csv_fp.write("%s,%f,%f,%f\n" % (t, x, y, z))
         print("Parsed X:%f Y:%f Z:%f" % (x, y, z))
 
+
+def test_spi_flash(yasp_client):
+    TEST_ADDR = 1024*64
+    TEST_LENGTH = 256
+    TEST_DATA = b"\xA5" * TEST_LENGTH
+    time.sleep(1)
+    resp = yasp_client.send_command(callback=None, msg_defn=MsgSpiFlashInit.builder())
+    print(resp)
+    cs_inst = resp.get_param("CsPinControlInstance")
+    if resp.get_param("FlashModel") != 1:
+        raise Exception("Flash unresponsive.")
+    time.sleep(1)
+    resp = yasp_client.send_command(callback=None, msg_defn=MsgSpiFlashRead.builder(cs_inst, TEST_ADDR, TEST_LENGTH))
+    print(resp)
+    resp = yasp_client.send_command(callback=None, msg_defn=MsgSpiFlashErase.builder(cs_inst, TEST_ADDR, 4096))
+    print(resp)
+    resp = yasp_client.send_command(callback=None, msg_defn=MsgSpiFlashRead.builder(cs_inst, TEST_ADDR, TEST_LENGTH))
+    print(resp)
+    resp = yasp_client.send_command(callback=None, msg_defn=MsgSpiFlashWrite.builder(cs_inst, TEST_ADDR, TEST_DATA))
+    print(resp)
+    resp = yasp_client.send_command(callback=None, msg_defn=MsgSpiFlashRead.builder(cs_inst, TEST_ADDR, TEST_LENGTH))
+    print(resp)
+    #resp = yasp_client.send_command(callback=None, msg_defn=MsgSpiFlashDisconnect.builder())
+    #print(resp)
+    time.sleep(1)
 
 
 def test_accel_events(yasp_client):
@@ -46,6 +74,7 @@ if __name__ == "__main__":
     #results = Bma400StreamHandler(yasp_client, "test_bma400.csv")
     time.sleep(0.1)
     #test_accel_events(yasp_client)
-    test_accel_stream(yasp_client)
+    #test_accel_stream(yasp_client)
+    test_spi_flash(yasp_client)
     time.sleep(0.1)
     client.disconnect(conn_handle)

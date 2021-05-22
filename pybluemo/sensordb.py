@@ -4,6 +4,8 @@ import json
 from aws_srp import AWSSRP
 from python_graphql_client import GraphqlClient
 import os
+import threading
+import time
 
 
 class GetOrCreateDataSourceInput(object):
@@ -38,6 +40,53 @@ class CreateDataStreamsInput(object):
 
     def json(self):
         return self.params
+
+
+class CreateDataStreamInput(object):
+    def __init__(self, user_id, source_id, start, end, data_label, channel, frequency, unit, values, collaborators=[]):
+        if end is None:
+            self.end = datetime.utcnow().isoformat() + "Z"
+        else:
+            self.end = end.isoformat() + "Z"
+        if start is None:
+            self.start = (datetime.utcnow() - self.timedelta()).isoformat() + "Z"
+        else:
+            self.start = start.isoformat() + "Z"
+        self.params = {
+            "userId": user_id,
+            "sourceId": source_id,
+            "start": self.start,
+            "end": self.end,
+            "dataLabel": data_label,
+            "channel": channel,
+            "frequency": frequency,
+            "unit": unit,
+            "values": values
+        }
+
+    def __len__(self):
+        return len(self.params["values"])
+
+    def timedelta(self):
+        return timedelta(seconds=(1 / self.params["frequency"]) * len(self))
+
+    def json(self):
+        return self.params
+
+
+class SaveStreamsInput(object):
+    def __init__(self, user_id, device_id, streams, start=None, end=None):
+        self.streams = streams
+        if end is None:
+            self.end = datetime.utcnow().isoformat() + "Z"
+        else:
+            self.end = end.isoformat() + "Z"
+        if start is None:
+            self.start = (datetime.utcnow() - streams[0].timedelta()).isoformat() + "Z"
+        else:
+            self.start = start.isoformat() + "Z"
+        self.user_id = user_id
+        self.device_id = device_id
 
 
 class CreateDataEventInput(object):
@@ -164,7 +213,7 @@ mutation GetOrCreateDataSources($input: [GetOrCreateDataSourceInput]!) {
         result = self.client.execute(query=mutation, variables=variables)
         return result['data']['getOrCreateDataSources']
 
-    def save_data_stream(self, user_id, device_id, start, end, stream_list, linked_sources=None):
+    def save_data_stream(self, save_streams_input, linked_sources=None):
         mutation = """
 mutation SaveDataStreams($userId: ID!, $deviceId: ID!, $start: AWSDateTime!, $end: AWSDateTime!,
                          $dataStreams: [CreateDataStreamsInput]!, $linkedSources: [ID]) {
@@ -187,11 +236,11 @@ mutation SaveDataStreams($userId: ID!, $deviceId: ID!, $start: AWSDateTime!, $en
   }
 }"""
         variables = {
-            'userId': user_id,
-            'deviceId': device_id,
-            'start': start,
-            'end': end,
-            'dataStreams': [i.json() for i in stream_list]
+            'userId': save_streams_input.user_id,
+            'deviceId': save_streams_input.device_id,
+            'start': save_streams_input.start,
+            'end': save_streams_input.end,
+            'dataStreams': [i.json() for i in save_streams_input.streams]
         }
         if linked_sources is not None:
             variables['linkedSources'] = linked_sources
@@ -199,6 +248,31 @@ mutation SaveDataStreams($userId: ID!, $deviceId: ID!, $start: AWSDateTime!, $en
             variables['linkedSources'] = []
         result = self.client.execute(query=mutation, variables=variables)
         return result['data']['saveDataStreams']
+
+    def create_data_stream(self, create_data_stream_input, condition=None):
+        mutation = """
+mutation CreateDataStream($input: CreateDataStreamInput!, $condition: ModelDataStreamConditionInput) {
+    createDataStream(input: $input, condition: $condition) {
+      id
+      userId
+      sourceId
+      start
+      end
+      dataLabel
+      channel
+      frequency
+      unit
+    }
+}
+"""
+        variables = {
+            'input': create_data_stream_input.json()
+        }
+        if condition is not None:
+            variables['condition'] = condition
+        result = self.client.execute(query=mutation, variables=variables)
+        print(result)
+        return result['data']['createDataStream']
 
     def publish_streams(self, data_streams):
         mutation = """
@@ -265,7 +339,7 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
 
 
 class CloudLogger(object):
-    def __init__(self, user, user_cohort_id, device, sensordb_client):
+    def __init__(self, user, user_cohort_id, device, sensordb_client, timeout=1):
         source_list = [GetOrCreateDataSourceInput(user, "User", user_cohort_id),
             GetOrCreateDataSourceInput(device, "Bluemo")]
         result = sensordb_client.get_or_create_data_sources(source_list)
@@ -276,24 +350,59 @@ class CloudLogger(object):
                 self.device_id = source['id']
             else:
                 raise Exception("Get Source IDs error.")
-        #self.user_id = result[0]['id']
-        #self.device_id = result[1]['id']
         self.sensordb_client = sensordb_client
+        self._continue = True
+        self._timeout = timeout
+        self._stream_list = []
+        self._event_list = []
+        self._semaphore = threading.Semaphore(1)
+        self.t = None
 
     def __str__(self):
         return "CloudLogger(%s,%s)" % (self.user_id, self.device_id)
 
-    def log_streams(self, streams, start=None, end=None):
-        if end is None:
-            end = datetime.utcnow().isoformat() + "Z"
-        if start is None:
-            start = (datetime.utcnow() - streams[0].timedelta()).isoformat() + "Z"
-        result = self.sensordb_client.save_data_stream(self.user_id, self.device_id, start, end, streams)
-        #print(result)
-        self.sensordb_client.publish_streams(result)
+    def _run(self):
+        while self._continue:
+            if len(self._stream_list) > 0:
+                self._semaphore.acquire()
+                streams = self._stream_list
+                self._stream_list = []
+                self._semaphore.release()
+                for stream in streams:
+                    result = self.sensordb_client.create_data_stream(stream)
+                    self.sensordb_client.publish_streams([result])
+                    print(result)
+            if len(self._event_list) > 0:
+                self._semaphore.acquire()
+                events = self._event_list
+                self._event_list = []
+                self._semaphore.release()
+                for event in events:
+                    result = self.sensordb_client.create_data_event(event)
+                    #self.sensordb_client.publish_event(result['userId'], result['sourceId'], result['id'])
+                    print(result)
+            time.sleep(1)
+            #print("Run...")
+
+    def start_daemon(self):
+        self._continue = True
+        self.t = threading.Thread(target=self._run, args=())
+        self.t.setDaemon(True)
+        self.t.start()
+
+    def stop_daemon(self):
+        while len(self._stream_list) > 0 or len(self._event_list) > 0:
+            time.sleep(0.1)
+        self._continue = False
+        self.t.join(self._timeout)
+
+    def log_stream(self, start, end, label, channel, frequency, unit, values):
+        self._semaphore.acquire()
+        self._stream_list.append(CreateDataStreamInput(self.user_id, self.device_id, start, end, label, channel, frequency, unit, values))
+        self._semaphore.release()
 
     def log_event(self, label, date_time=None, value=None, unit=None, channel=None):
-        input = CreateDataEventInput(self.user_id, self.device_id, label, date_time, value, unit, channel)
-        result = self.sensordb_client.create_data_event(input)
-        #print(result)
-        self.sensordb_client.publish_event(result['userId'], result['sourceId'], result['id'])
+        self._semaphore.acquire()
+        create_data_event_input = CreateDataEventInput(self.user_id, self.device_id, label, date_time, value, unit, channel)
+        self._event_list.append(create_data_event_input)
+        self._semaphore.release()

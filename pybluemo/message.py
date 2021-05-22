@@ -298,6 +298,13 @@ class EnumSaadcTacq(object):
     FORTY_MICRO = 5
 
 
+class EnumPhyCoding(object):
+    ONE_MBPS = 0
+    TWO_MBPS = 1
+    FIVE_HUNDRED_KBPS = 2
+    ONE_TWO_FIVE_KBPS = 3
+
+
 class MsgError(MessageDefinition):
     _MSG_NAME = "Error"
     _CMD_CODE = 0
@@ -791,7 +798,7 @@ class MsgRgbRunLenEnc(MessageDefinition):
     _MSG_NAME = "RgbRunLenEnc"
     _CMD_CODE = 29
     _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationPeriodMs', 'Type': 'uint32_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t', 'Description': '0: None, 1: Rotation'}, {'Name': 'Encoding', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationRate', 'Type': 'uint8_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t'}, {'Name': 'Encoding', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationPeriodMs', 'Type': 'uint32_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t'}, {'Name': 'Encoding', 'Type': 'uint8_t *'}]
 
     @classmethod
     def builder(cls, instance, led_length, animation_period_ms, animation_type, encoding, modify=0):
@@ -803,6 +810,157 @@ class MsgRgbRunLenEnc(MessageDefinition):
             "AnimationPeriodMs": animation_period_ms,
             "AnimationType": animation_type,
             "Encoding": encoding,
+        }
+        return msg
+
+
+class MsgServoConfig(MessageDefinition):
+    _MSG_NAME = "ServoConfig"
+    _CMD_CODE = 30
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PwmLowLimit', 'Type': 'uint16_t', 'Default': 600}, {'Name': 'PwmHighLimit', 'Type': 'uint16_t', 'Default': 2500}, {'Name': 'DownSpeedLimit', 'Type': 'uint16_t', 'Default': 1900}, {'Name': 'UpSpeedLimit', 'Type': 'uint16_t', 'Default': 1900}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PwmLowLimit', 'Type': 'uint16_t'}, {'Name': 'PwmHighLimit', 'Type': 'uint16_t'}, {'Name': 'DownSpeedLimit', 'Type': 'uint16_t'}, {'Name': 'UpSpeedLimit', 'Type': 'uint16_t'}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, instance, channel, servo_name, modify=0, pwm_low_limit=600, pwm_high_limit=2500, down_speed_limit=1900, up_speed_limit=1900):
+        msg = cls()
+        msg.parameters = {
+            "Instance": instance,
+            "Channel": channel,
+            "Modify": modify,
+            "PwmLowLimit": pwm_low_limit,
+            "PwmHighLimit": pwm_high_limit,
+            "DownSpeedLimit": down_speed_limit,
+            "UpSpeedLimit": up_speed_limit,
+            "ServoName": servo_name,
+        }
+        return msg
+
+
+class MsgServoControl(MessageDefinition):
+    _MSG_NAME = "ServoControl"
+    _CMD_CODE = 31
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t', 'Description': 'There are 8 channels per module, 0b000 through 0b111.'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PulseWidth', 'Type': 'uint16_t', 'Description': 'Microseconds.'}, {'Name': 'MoveSpeed', 'Type': 'uint16_t', 'Default': 1900, 'Description': 'Maximum change per 20ms from the current pulse width.'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}, {'Name': 'MoveSpeed', 'Type': 'uint16_t'}]
+
+    @classmethod
+    def builder(cls, instance, channel, pulse_width, modify=0, move_speed=1900):
+        msg = cls()
+        msg.parameters = {
+            "Instance": instance,
+            "Channel": channel,
+            "Modify": modify,
+            "PulseWidth": pulse_width,
+            "MoveSpeed": move_speed,
+        }
+        return msg
+
+
+class MsgRobotisConfig(MessageDefinition):
+    _MSG_NAME = "RobotisConfig"
+    _CMD_CODE = 32
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ServoId', 'Type': 'uint8_t'}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'ServoId', 'Type': 'uint8_t'}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, servo_id, servo_name, modify=0):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "ServoId": servo_id,
+            "ServoName": servo_name,
+        }
+        return msg
+
+
+class MsgRobotisCommand(MessageDefinition):
+    _MSG_NAME = "RobotisCommand"
+    _CMD_CODE = 33
+    _CMD_PARAMS = [{'Name': 'ServoId', 'Type': 'uint8_t'}, {'Name': 'Instruction', 'Type': 'uint8_t', 'Description': '1:Ping, 2:Read, 3:Write, 4:RegWrite, 5:Action, 6:FactoryReset, 7:Reboot, 8:SyncWrite, 9:BulkRead'}, {'Name': 'Parameters', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'BytesSent', 'Type': 'uint32_t'}, {'Name': 'ResponseServoId', 'Type': 'uint8_t'}, {'Name': 'ResponseErrorStatus', 'Type': 'uint8_t'}, {'Name': 'ResponseParameters', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, servo_id, instruction, parameters):
+        msg = cls()
+        msg.parameters = {
+            "ServoId": servo_id,
+            "Instruction": instruction,
+            "Parameters": parameters,
+        }
+        return msg
+
+
+class MsgPwmChannelConfig(MessageDefinition):
+    _MSG_NAME = "PwmChannelConfig"
+    _CMD_CODE = 34
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'MinPeriod', 'Type': 'uint16_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint16_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint16_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'MinPeriod', 'Type': 'uint16_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint16_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint16_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, instance, modify, min_period, min_pulse_width, max_pulse_width, channel_name):
+        msg = cls()
+        msg.parameters = {
+            "Instance": instance,
+            "Modify": modify,
+            "MinPeriod": min_period,
+            "MinPulseWidth": min_pulse_width,
+            "MaxPulseWidth": max_pulse_width,
+            "ChannelName": channel_name,
+        }
+        return msg
+
+
+class MsgPwmChannelControl(MessageDefinition):
+    _MSG_NAME = "PwmChannelControl"
+    _CMD_CODE = 35
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}]
+
+    @classmethod
+    def builder(cls, instance, channel, modify, pulse_width):
+        msg = cls()
+        msg.parameters = {
+            "Instance": instance,
+            "Channel": channel,
+            "Modify": modify,
+            "PulseWidth": pulse_width,
+        }
+        return msg
+
+
+class MsgConnParamUpdate(MessageDefinition):
+    _MSG_NAME = "ConnParamUpdate"
+    _CMD_CODE = 36
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ConnHandle', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'ConnIntervalMin_1p25ms', 'Type': 'uint16_t', 'Default': 6}, {'Name': 'ConnIntervalMax_1p25ms', 'Type': 'uint16_t', 'Default': 16}, {'Name': 'SlaveLatency', 'Type': 'uint8_t', 'Default': 4}, {'Name': 'ConnSupTimeout_10ms', 'Type': 'uint16_t', 'Default': 400}, {'Name': 'ConnTxPower', 'Type': 'int8_t', 'Default': 0}, {'Name': 'ConnPhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding', 'Default': 0}]
+    _RSP_PARAMS = [{'Name': 'ConnHandle', 'Type': 'uint8_t'}, {'Name': 'ConnInterval', 'Type': 'uint16_t'}, {'Name': 'ConnIntervalMin_1p25ms', 'Type': 'uint16_t', 'Default': 6}, {'Name': 'ConnIntervalMax_1p25ms', 'Type': 'uint16_t', 'Default': 16}, {'Name': 'SlaveLatency', 'Type': 'uint8_t', 'Default': 4}, {'Name': 'ConnSupTimeout_10ms', 'Type': 'uint16_t'}, {'Name': 'ConnTxPower', 'Type': 'int8_t'}, {'Name': 'ConnPhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding'}]
+
+    @classmethod
+    def builder(cls, modify=0, conn_handle=255, conn_interval_min_1p25ms=6, conn_interval_max_1p25ms=16, slave_latency=4, conn_sup_timeout_10ms=400, conn_tx_power=0, conn_phy_coding=0):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "ConnHandle": conn_handle,
+            "ConnIntervalMin_1p25ms": conn_interval_min_1p25ms,
+            "ConnIntervalMax_1p25ms": conn_interval_max_1p25ms,
+            "SlaveLatency": slave_latency,
+            "ConnSupTimeout_10ms": conn_sup_timeout_10ms,
+            "ConnTxPower": conn_tx_power,
+            "ConnPhyCoding": conn_phy_coding,
+        }
+        return msg
+
+
+class MsgRtcSync(MessageDefinition):
+    _MSG_NAME = "RtcSync"
+    _CMD_CODE = 37
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'SyncValue', 'Type': 'uint32_t'}]
+    _RSP_PARAMS = [{'Name': 'CurrentClock', 'Type': 'uint32_t'}, {'Name': 'SyncValue', 'Type': 'uint32_t'}]
+
+    @classmethod
+    def builder(cls, modify, sync_value):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "SyncValue": sync_value,
         }
         return msg
 
@@ -838,4 +996,12 @@ MSG_CLASS_BY_RSP_CODE = {
     155: MsgAnalogMeasurement,
     156: MsgAnalogStream,
     157: MsgRgbRunLenEnc,
+    158: MsgServoConfig,
+    159: MsgServoControl,
+    160: MsgRobotisConfig,
+    161: MsgRobotisCommand,
+    162: MsgPwmChannelConfig,
+    163: MsgPwmChannelControl,
+    164: MsgConnParamUpdate,
+    165: MsgRtcSync,
 }

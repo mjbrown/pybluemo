@@ -17,9 +17,9 @@ def test_accel_events(yasp_client):
 
 
 def test_accel_stream(yasp_client):
-    resp = yasp_client.send_command(callback=None, msg_defn=MsgAccelStream.builder(EnumAccelDataRange.G8, EnumAccelDataRate.F25, 7*10))
+    resp = yasp_client.send_command(callback=None, msg_defn=MsgAccelStream.builder(EnumAccelDataRange.G8, EnumAccelDataRate.F100, 7*10))
     print(resp)
-    time.sleep(60)
+    time.sleep(600)
     resp = yasp_client.send_command(callback=None, msg_defn=MsgAccelStream.builder(EnumAccelDataRange.G4, EnumAccelDataRate.OFF, 7*10))
     print(resp)
 
@@ -39,10 +39,12 @@ if __name__ == "__main__":
     time.sleep(0.1)
     addr = "".join(["%X" % i for i in client.connections[conn_handle].address])
     sensordb_client = SensorDbClient("sensordb_client_config.json")
-    cloud_logger = CloudLogger(user="Test Guy",
-                               user_cohort_id="d7b50a5b-1f43-4c32-9f47-6232d48935f3",
+    cloud_logger = CloudLogger(user="TechReviewDemo",
+                               user_cohort_id="65ec2d72-3743-45f3-abb7-a9858bb71673",
                                device=addr, sensordb_client=sensordb_client)
-    results = Bma400StreamHandler(yasp_client, "test_bma400.csv", cloud_logger)
+    results = Bma400StreamHandler(yasp_client, "JustTestin.csv", cloud_logger)
+    cloud_logger.start_daemon()
     test_accel_stream(yasp_client)
+    cloud_logger.stop_daemon()
     time.sleep(0.1)
     client.disconnect(conn_handle)
