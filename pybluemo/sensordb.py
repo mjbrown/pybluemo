@@ -122,6 +122,7 @@ class SensorDbClient(object):
             pool_region = cfg_json["CognitoPoolRegion"]
             client_id = cfg_json["CognitoClientId"]
             sensordb_api_url = cfg_json["SensorDbApiUrl"]
+            self.bucket = cfg_json["S3DownloadsBucket"]
             if "CognitoClientSecret" in cfg_json:
                 client_secret = cfg_json["CognitoClientSecret"]
             else:
@@ -336,6 +337,60 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
         variables = {'userId': user_id, 'sourceId': source_id, 'eventId': event_id}
         result = self.client.execute(query=mutation, variables=variables)
         return result
+
+    def create_yasp_firmware(self, dfu_s3_key, hex_s3_key, yasp_spec_key, fw_version, sw_version, hw_version):
+        mutation = """
+          mutation CreateYaspFirmware(
+    $input: CreateYaspFirmwareInput!
+    $condition: ModelYaspFirmwareConditionInput
+  ) {
+    createYaspFirmware(input: $input, condition: $condition) {
+      id
+      fwVersion
+      swVersion
+      hwVersion
+      manufacturing
+      DFUPackage
+      yaspSpecification
+      collaborators
+      createdAt
+      updatedAt
+      owner
+    }
+  }"""
+        variables = {
+            "input": {
+            "fwVersion": fw_version,
+            "swVersion": sw_version,
+            "hwVersion": hw_version,
+            "manufacturing": hex_s3_key,
+            "DFUPackage": dfu_s3_key,
+            "yaspSpecification": yasp_spec_key
+            }
+        }
+        result = self.client.execute(query=mutation, variables=variables)
+        if result['data'] is None:
+            raise RuntimeError(result['errors'])
+
+    def upload_fw_files(self, dfu_filename, hex_filename, dfu_s3_key, hex_s3_key, spec_filename, spec_s3_key):
+        s3 = boto3.client("s3")
+        s3.upload_file(dfu_filename, self.bucket, dfu_s3_key)
+        s3.upload_file(hex_filename, self.bucket, hex_s3_key)
+        s3.upload_file(spec_filename, self.bucket, spec_s3_key)
+
+    def increase_fw_version(self, new_major_ver):
+        ver_dict = {
+            "MAJOR_VERSION": new_major_ver
+        }
+        with open("temp_s3_version.json", 'w') as file:
+            json.dump(ver_dict, file)
+        s3 = boto3.client("s3")
+        s3.upload_file("temp_s3_version.json", self.bucket, "settings/firmwareVersions.json")
+
+    def get_fw_version(self):
+        s3 = boto3.resource("s3")
+        ver = json.loads(s3.Object(bucket_name=self.bucket, key="settings/firmwareVersions.json").get()['Body'].read())
+        return ver
 
 
 class CloudLogger(object):
