@@ -4,5 +4,6 @@
   "CognitoPoolId": "",
   "CognitoPoolRegion": "",
   "CognitoClientId": "",
-  "SensorDbApiUrl": ""
+  "SensorDbApiUrl": "",
+  "S3DownloadsBucket": ""
 }

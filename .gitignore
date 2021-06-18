@@ -93,3 +93,4 @@ venv38/
 examples/*.csv
 tests/auth_token.json
 examples/auth_token.json
+pybluemo/auth_token.json
