@@ -338,7 +338,7 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
         result = self.client.execute(query=mutation, variables=variables)
         return result
 
-    def create_yasp_firmware(self, dfu_s3_key, hex_s3_key, yasp_spec_key, fw_version, sw_version, hw_version):
+    def create_yasp_firmware(self, dfu_s3_key, hex_s3_key, yasp_json_string, fw_version, sw_version, hw_version):
         mutation = """
           mutation CreateYaspFirmware(
     $input: CreateYaspFirmwareInput!
@@ -365,18 +365,17 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
             "hwVersion": hw_version,
             "manufacturing": hex_s3_key,
             "DFUPackage": dfu_s3_key,
-            "yaspSpecification": yasp_spec_key
+            "yaspSpecification": yasp_json_string
             }
         }
         result = self.client.execute(query=mutation, variables=variables)
         if result['data'] is None:
             raise RuntimeError(result['errors'])
 
-    def upload_fw_files(self, dfu_filename, hex_filename, dfu_s3_key, hex_s3_key, spec_filename, spec_s3_key):
+    def upload_fw_files(self, dfu_filename, hex_filename, dfu_s3_key, hex_s3_key):
         s3 = boto3.client("s3")
         s3.upload_file(dfu_filename, self.bucket, dfu_s3_key)
         s3.upload_file(hex_filename, self.bucket, hex_s3_key)
-        s3.upload_file(spec_filename, self.bucket, spec_s3_key)
 
     def increase_fw_version(self, new_major_ver):
         ver_dict = {
