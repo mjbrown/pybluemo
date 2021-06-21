@@ -86,7 +86,7 @@ class Bma400StreamHandler(object):
             if data[0] & 0xE0 == 0x80:  # Sensor data frame
                 if data[0] & 0x0F != 0x0E:
                     raise Exception("You must enable all three accelerometer axes.")
-                if data[0] & 0x10 == 1 and len(data) >= 4:
+                if (data[0] & 0x10) == 0x10 and len(data) >= 4:
                     self.parsed_data_ready(
                         self.accel_to_float(range, data[1], 8),
                         self.accel_to_float(range, data[2], 8),
