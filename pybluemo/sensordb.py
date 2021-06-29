@@ -359,7 +359,6 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
       updatedAt
       owner
     }
-  }
   }"""
         variables = {
             "input": {
@@ -388,6 +387,7 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
             json.dump(ver_dict, file)
         s3 = boto3.client("s3")
         s3.upload_file("temp_s3_version.json", self.bucket, "settings/firmwareVersions.json")
+        os.remove("temp_s3_version.json")
 
     def get_fw_version(self):
         s3 = boto3.resource("s3")
