@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import boto3
 import json
-from aws_srp import AWSSRP
+from pybluemo.aws_srp import AWSSRP
 from python_graphql_client import GraphqlClient
 import os
 import threading
