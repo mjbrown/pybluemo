@@ -1,3 +1,3 @@
 from .core import YaspClient, YaspBlueGigaClient
 from .message import *
-import aws_srp
+from pybluemo.aws_srp import AWSSRP
