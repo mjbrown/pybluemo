@@ -12,7 +12,7 @@ README = (HERE / "README.md").read_text()
 setup(
   name='pybluemo',
   packages=['pybluemo'],
-  version='0.7',
+  version='0.8',
   description='Interface library for the Bluemo Bluetooth motion controller.',
   long_description=README,
   url='https://github.com/mjbrown/pybluemo',

@@ -352,7 +352,6 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
       manufacturing
       DFUPackage
       yaspSpecification
-      collaborators
       createdAt
       updatedAt
       owner
