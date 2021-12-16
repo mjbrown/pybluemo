@@ -113,16 +113,20 @@ class CreateDataEventInput(object):
 
 class SensorDbClient(object):
     def __init__(self, cfg_json_filename, auth_token_filename="auth_token.json"):
-        self.token = None
+        self.access_token = None
         with open(cfg_json_filename, "r") as cfg_fp:
             cfg_json = json.load(cfg_fp)
             username = cfg_json["Username"]
             password = cfg_json["Password"]
-            pool_id = cfg_json["CognitoPoolId"]
-            pool_region = cfg_json["CognitoPoolRegion"]
+            self.pool_id = cfg_json["CognitoPoolId"]
+            self.pool_region = cfg_json["CognitoPoolRegion"]
             client_id = cfg_json["CognitoClientId"]
             sensordb_api_url = cfg_json["SensorDbApiUrl"]
             self.bucket = cfg_json["S3DownloadsBucket"]
+            if "IdentityPoolId" in cfg_json:
+                self.identity_pool_id = cfg_json["IdentityPoolId"]
+            if "AccountId" in cfg_json:
+                self.account_id = cfg_json["AccountId"]
             if "CognitoClientSecret" in cfg_json:
                 client_secret = cfg_json["CognitoClientSecret"]
             else:
@@ -134,17 +138,26 @@ class SensorDbClient(object):
                 header_date = datetime.strptime(result['ResponseMetadata']['HTTPHeaders']['date'], '%a, %d %b %Y %H:%M:%S GMT')
                 print(header_date + expires_in, datetime.utcnow())
                 if header_date + expires_in > datetime.utcnow():
-                    self.token = result['AuthenticationResult']['AccessToken']
-        if self.token is None:
-            cognito_client = boto3.client('cognito-idp', pool_region)
-            self.awssrp = AWSSRP(username, password, pool_id, client_id,
+                    self.access_token = result['AuthenticationResult']['AccessToken']
+                    self.id_token = result['AuthenticationResult']['IdToken']
+        if self.access_token is None or self.id_token is None:
+            cognito_client = boto3.client('cognito-idp', self.pool_region)
+            self.awssrp = AWSSRP(username, password, self.pool_id, client_id,
                                  client=cognito_client, client_secret=client_secret)
             result = self.awssrp.authenticate_user(client=cognito_client)
             with open(auth_token_filename, "w") as token_fp:
                 json.dump(result, token_fp, indent=2)
-            self.token = result['AuthenticationResult']['AccessToken']
+        self.access_token = result['AuthenticationResult']['AccessToken']
+        self.id_token = result['AuthenticationResult']['IdToken']
+        self.client = GraphqlClient(sensordb_api_url, headers={'authorization': self.access_token})
 
-        self.client = GraphqlClient(sensordb_api_url, headers={'authorization': self.token})
+    def get_identity_id(self):
+        identity_client = boto3.client('cognito-identity', self.pool_region)
+        return identity_client.get_id(
+            AccountId=self.account_id,
+            IdentityPoolId=self.identity_pool_id,
+            Logins={'cognito-idp.%s.amazonaws.com/%s' % (self.pool_region, self.pool_id): self.id_token})['IdentityId']
+
 
     def list_cohorts(self, query_filter=None, limit=None, next_token=None):
         query = """

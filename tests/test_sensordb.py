@@ -35,6 +35,7 @@ def test_create_data_event(client):
 
 if __name__ == "__main__":
     sensordb_client = SensorDbClient("../examples/sensordb_client_config.json")
+    print(sensordb_client.get_identity_id())
     print(sensordb_client.list_cohorts())
     print(sensordb_client.list_sources())
     print(sensordb_client.list_yasp_firmwares())
