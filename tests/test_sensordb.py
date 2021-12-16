@@ -37,6 +37,7 @@ if __name__ == "__main__":
     sensordb_client = SensorDbClient("../examples/sensordb_client_config.json")
     print(sensordb_client.list_cohorts())
     print(sensordb_client.list_sources())
-    test_get_or_create(sensordb_client)
+    print(sensordb_client.list_yasp_firmwares())
+    #test_get_or_create(sensordb_client)
     #test_create_data_streams(sensordb_client)
     #test_create_data_event(sensordb_client)

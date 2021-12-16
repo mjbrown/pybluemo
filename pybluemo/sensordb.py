@@ -153,7 +153,6 @@ query ListCohorts ($filter: ModelCohortFilterInput, $limit: Int, $nextToken: Str
     items {
       id
       category
-      collaborators
       createdAt
       label
       owner
@@ -221,7 +220,6 @@ mutation SaveDataStreams($userId: ID!, $deviceId: ID!, $start: AWSDateTime!, $en
   saveDataStreams(userId: $userId, deviceId: $deviceId, start: $start, end: $end, 
                   dataStreams: $dataStreams, linkedSources: $linkedSources) {
     channel
-    collaborators
     createdAt
     dataLabel
     end
@@ -373,6 +371,31 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
         result = self.client.execute(query=mutation, variables=variables)
         if result['data'] is None:
             raise RuntimeError(result['errors'])
+
+    def list_yasp_firmwares(self, query_filter=None, limit=None, next_token=None):
+        query = """
+query ListYaspFirmwares($filter: ModelYaspFirmwareFilterInput, $limit: Int, $nextToken: String) {
+  listYaspFirmwares(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      owner
+      fwVersion
+      hwVersion
+      swVersion
+      DFUPackage
+    }
+    nextToken
+  }
+}"""
+        variables = {}
+        if query_filter is not None:
+            variables['filter'] = query_filter
+        if limit is not None:
+            variables['limit'] = limit
+        if next_token is not None:
+            variables['nextToken'] = next_token
+        result = self.client.execute(query=query, variables=variables)
+        return result['data']['listYaspFirmwares']
 
     def upload_fw_files(self, dfu_filename, hex_filename, dfu_s3_key, hex_s3_key):
         s3 = boto3.client("s3")
