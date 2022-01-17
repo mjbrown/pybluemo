@@ -158,7 +158,6 @@ class SensorDbClient(object):
             IdentityPoolId=self.identity_pool_id,
             Logins={'cognito-idp.%s.amazonaws.com/%s' % (self.pool_region, self.pool_id): self.id_token})['IdentityId']
 
-
     def list_cohorts(self, query_filter=None, limit=None, next_token=None):
         query = """
 query ListCohorts ($filter: ModelCohortFilterInput, $limit: Int, $nextToken: String) {
@@ -349,7 +348,8 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
         result = self.client.execute(query=mutation, variables=variables)
         return result
 
-    def create_yasp_firmware(self, dfu_s3_key, hex_s3_key, yasp_json_string, fw_version, sw_version, hw_version):
+    def create_yasp_firmware(self, dfu_s3_key, hex_s3_key, yasp_json_string, fw_version, sw_version, hw_version,
+                             create_date=datetime.utcnow().isoformat() + "Z"):
         mutation = """
           mutation CreateYaspFirmware(
     $input: CreateYaspFirmwareInput!
@@ -363,9 +363,6 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
       manufacturing
       DFUPackage
       yaspSpecification
-      _version
-      _deleted
-      _lastChangedAt
       createdAt
       updatedAt
       owner
@@ -373,12 +370,13 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
   }"""
         variables = {
             "input": {
-            "fwVersion": fw_version,
-            "swVersion": sw_version,
-            "hwVersion": hw_version,
-            "manufacturing": hex_s3_key,
-            "DFUPackage": dfu_s3_key,
-            "yaspSpecification": yasp_json_string
+                "fwVersion": fw_version,
+                "swVersion": sw_version,
+                "hwVersion": hw_version,
+                "manufacturing": hex_s3_key,
+                "DFUPackage": dfu_s3_key,
+                "yaspSpecification": yasp_json_string,
+                "createDate": create_date,
             }
         }
         result = self.client.execute(query=mutation, variables=variables)
@@ -396,6 +394,7 @@ query ListYaspFirmwares($filter: ModelYaspFirmwareFilterInput, $limit: Int, $nex
       hwVersion
       swVersion
       DFUPackage
+      createDate
     }
     nextToken
   }
