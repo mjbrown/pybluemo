@@ -348,26 +348,26 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
         result = self.client.execute(query=mutation, variables=variables)
         return result
 
-    def create_yasp_firmware(self, dfu_s3_key, hex_s3_key, yasp_json_string, fw_version, sw_version, hw_version,
+    def create_yasp_firmware(self, dfu_s3_key, hex_s3_key, yasp_json_string, fw_version, sw_version, hw_version, groups,
                              create_date=datetime.utcnow().isoformat() + "Z"):
         mutation = """
-          mutation CreateYaspFirmware(
-    $input: CreateYaspFirmwareInput!
-    $condition: ModelYaspFirmwareConditionInput
-  ) {
-    createYaspFirmware(input: $input, condition: $condition) {
-      id
-      fwVersion
-      swVersion
-      hwVersion
-      manufacturing
-      DFUPackage
-      yaspSpecification
-      createdAt
-      updatedAt
-      owner
-    }
-  }"""
+            mutation CreateYaspFirmware(
+      $input: CreateYaspFirmwareInput!
+      $condition: ModelYaspFirmwareConditionInput
+    ) {
+      createYaspFirmware(input: $input, condition: $condition) {
+        id
+        fwVersion
+        swVersion
+        hwVersion
+        manufacturing
+        DFUPackage
+        yaspSpecification
+        createdAt
+        updatedAt
+        owner
+      }
+    }"""
         variables = {
             "input": {
                 "fwVersion": fw_version,
@@ -377,6 +377,7 @@ mutation PublishEvent($userId: ID!, $sourceId: ID!, $eventId: ID!) {
                 "DFUPackage": dfu_s3_key,
                 "yaspSpecification": yasp_json_string,
                 "createDate": create_date,
+                "groups": groups
             }
         }
         result = self.client.execute(query=mutation, variables=variables)

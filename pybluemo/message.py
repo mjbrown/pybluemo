@@ -1,17 +1,17 @@
 import struct
 
 
-class Consts(object):
-    MSGS = "Messages"
-    MSG_NAME = "Name"
-    MSG_COMMAND = "Command"
-    MSG_CODE = "Command Code"
-    MSG_RESPONSE = "Response"
-    MSG_DESC = "Description"
-    MSG_PARAM_NAME = "Name"
-    MSG_PARAM_TYPE = "Type"
-    MSG_PARAM_DESC = "Description"
-    MSG_PARAM_DEFAULT = "Default"
+MSGS = "Messages"
+MSG_NAME = "Name"
+MSG_COMMAND = "Command"
+MSG_CODE = "Command Code"
+MSG_RESPONSE = "Response"
+MSG_DESC = "Description"
+
+MSG_PARAM_NAME = "Name"
+MSG_PARAM_TYPE = "Type"
+MSG_PARAM_DESC = "Description"
+MSG_PARAM_DEFAULT = "Default"
 
 
 class MessageDefinition(object):
@@ -32,55 +32,55 @@ class MessageDefinition(object):
         format_str = "<"
         params_tuple = tuple()
         for param in param_list:
-            if param[Consts.MSG_PARAM_TYPE] == "uint8_t":
+            if param[MSG_PARAM_TYPE] == "uint8_t":
                 format_str += "B"
-            elif param[Consts.MSG_PARAM_TYPE] == "uint16_t":
+            elif param[MSG_PARAM_TYPE] == "uint16_t":
                 format_str += "H"
-            elif param[Consts.MSG_PARAM_TYPE] == "int16_t":
+            elif param[MSG_PARAM_TYPE] == "int16_t":
                 format_str += "h"
-            elif param[Consts.MSG_PARAM_TYPE] == "uint32_t":
+            elif param[MSG_PARAM_TYPE] == "uint32_t":
                 format_str += "I"
-            elif param[Consts.MSG_PARAM_TYPE] == "int32_t":
+            elif param[MSG_PARAM_TYPE] == "int32_t":
                 format_str += "i"
-            elif param[Consts.MSG_PARAM_NAME] == "float":
+            elif param[MSG_PARAM_NAME] == "float":
                 format_str += "f"
-            elif param[Consts.MSG_PARAM_TYPE] == "uint8_t *":
-                format_str += "%ds" % len(self.get_param(param[Consts.MSG_PARAM_NAME]))
-            if param[Consts.MSG_PARAM_NAME] in self.parameters:
-                params_tuple += (self.get_param(param[Consts.MSG_PARAM_NAME]),)
-            elif Consts.MSG_PARAM_DEFAULT in param:
-                params_tuple += (param[Consts.MSG_PARAM_DEFAULT], )
+            elif param[MSG_PARAM_TYPE] == "uint8_t *":
+                format_str += "%ds" % len(self.get_param(param[MSG_PARAM_NAME]))
+            if param[MSG_PARAM_NAME] in self.parameters:
+                params_tuple += (self.get_param(param[MSG_PARAM_NAME]),)
+            elif MSG_PARAM_DEFAULT in param:
+                params_tuple += (param[MSG_PARAM_DEFAULT], )
             else:
-                raise Exception("Required parameter not specified: %s" % param[Consts.MSG_PARAM_NAME])
+                raise Exception("Required parameter not specified: %s" % param[MSG_PARAM_NAME])
         return struct.pack(format_str, *params_tuple)
 
     def _unpack(self, payload, param_list):
         format_str = "<"
         offset = 0
         for param in param_list:
-            if param[Consts.MSG_PARAM_TYPE] == "uint8_t":
+            if param[MSG_PARAM_TYPE] == "uint8_t":
                 format_str += "B"
                 offset += 1
-            elif param[Consts.MSG_PARAM_TYPE] == "uint16_t":
+            elif param[MSG_PARAM_TYPE] == "uint16_t":
                 format_str += "H"
                 offset += 2
-            elif param[Consts.MSG_PARAM_TYPE] == "int16_t":
+            elif param[MSG_PARAM_TYPE] == "int16_t":
                 format_str += "h"
                 offset += 2
-            elif param[Consts.MSG_PARAM_TYPE] == "uint32_t":
+            elif param[MSG_PARAM_TYPE] == "uint32_t":
                 format_str += "I"
                 offset += 4
-            elif param[Consts.MSG_PARAM_TYPE] == "int32_t":
+            elif param[MSG_PARAM_TYPE] == "int32_t":
                 format_str += "i"
                 offset += 4
-            elif param[Consts.MSG_PARAM_TYPE] == "float":
+            elif param[MSG_PARAM_TYPE] == "float":
                 format_str += "f"
                 offset += 4
-            elif param[Consts.MSG_PARAM_TYPE] == "uint8_t *":
+            elif param[MSG_PARAM_TYPE] == "uint8_t *":
                 format_str += "%ds" % (len(payload) - offset)
         params_tuple = struct.unpack(format_str, payload)
         for i in range(len(param_list)):
-            self.set_param(param_list[i][Consts.MSG_PARAM_NAME], params_tuple[i])
+            self.set_param(param_list[i][MSG_PARAM_NAME], params_tuple[i])
 
     def set_param(self, name, value):
         self.parameters[name] = value
@@ -179,11 +179,16 @@ class EnumSenseConfig(object):
 
 class EnumPinFunction(object):
     DISCONNECT = 0
-    CONTROL = 1
-    MONITOR = 2
-    ANALOG_INPUT = 3
-    LED_DATA = 4
-    TOTAL_FUNCTIONS = 5
+    PIN_CONTROL = 1
+    PIN_MONITOR = 2
+    PIN_ANALOG_INPUT = 3
+    PIN_LED_DATA = 4
+    PIN_SERVO_PULSE = 5
+    PIN_SERVO_CLOCK = 6
+    PIN_SERVO_RESET = 7
+    PIN_PWM_CHANNEL = 8
+    PIN_ROBOTIS = 9
+    TOTAL_FUNCTIONS = 10
 
 
 class EnumDriveStrength(object):
@@ -305,6 +310,91 @@ class EnumPhyCoding(object):
     ONE_TWO_FIVE_KBPS = 3
 
 
+class EnumTxPower(object):
+    NEG40D_BM = 0
+    NEG20D_BM = 1
+    NEG16D_BM = 2
+    NEG12D_BM = 3
+    NEG8D_BM = 4
+    NEG4D_BM = 5
+    ZEROD_BM = 6
+    POS2D_BM = 7
+    POS3D_BM = 8
+    POS4D_BM = 9
+    POS5D_BM = 10
+    POS6D_BM = 11
+    POS7D_BM = 12
+    POS8D_BM = 13
+
+
+class EnumAdvertiseIn(object):
+    DO_NOT_INCLUDE = 0
+    ADVERTISEMENT = 1
+    SCAN_RESPONSE = 2
+
+
+class EnumAdvertisingType(object):
+    CONNECTABLE_SCANNABLE_UNDIRECTED = 0
+    CONNECTABLE_NONSCANNABLE_DIRECTED_FAST = 1
+    CONNECTABLE_NONSCANNABLE_DIRECTED = 2
+    EXTENDED_CONNECTABLE_NONSCANNABLE_UNDIRECTED = 3
+    EXTENDED_CONNECTABLE_NONSCANNABLE_DIRECTED = 4
+
+
+class EnumAnalogInput(object):
+    A_I_N0 = 0
+    A_I_N1 = 1
+    A_I_N2 = 2
+    A_I_N3 = 3
+    A_I_N4 = 4
+    A_I_N5 = 5
+    A_I_N6 = 6
+    A_I_N7 = 7
+    V_D_D_H_D_I_V5 = 8
+
+
+class EnumFilterType(object):
+    NO_FILTER = 0
+    BY_ADDRESS = 1
+    BY_ADV_DATA = 2
+    BONDED_ONLY = 3
+
+
+class EnumActionType(object):
+    DISCONNECT = 0
+    BLUEMO_INIT = 1
+
+
+class EnumConnectionStatus(object):
+    NOT_CONNECTED = 0
+    PERIPHERAL_ROLE = 1
+    CENTRAL_ROLE = 2
+
+
+class EnumAnimationType(object):
+    NONE = 0
+    ROTATION = 1
+    SEGMENT_ROTATION = 2
+    FRAME_BY_FRAME = 3
+
+
+class EnumPatternType(object):
+    NORMAL = 0
+    ASCENDING = 1
+    DESCENDING = 2
+    UP_DOWN = 3
+    REVERSE_ASCENDING = 4
+    REVERSE_DESCENDING = 5
+    REVERSE_UP_DOWN = 6
+
+
+class EnumRgbColorBytes(object):
+    RED_GREEN_BLUE = 0
+    GREEN_RED_BLUE = 1
+    RED_GREEN_BLUE_INVERTED = 2
+    GREEN_RED_BLUE_INVERTED = 3
+
+
 class MsgError(MessageDefinition):
     _MSG_NAME = "Error"
     _CMD_CODE = 0
@@ -320,20 +410,17 @@ class MsgError(MessageDefinition):
         return msg
 
 
-class MsgDeviceConfig(MessageDefinition):
-    _MSG_NAME = "DeviceConfig"
+class MsgDeviceName(MessageDefinition):
+    _MSG_NAME = "DeviceName"
     _CMD_CODE = 1
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'BatteryType', 'Type': 'uint8_t', 'Enum': 'BatteryType', 'Default': 0}, {'Name': 'HardwareRevision', 'Type': 'uint8_t', 'Default': 0}, {'Name': 'SerialNumber', 'Type': 'uint32_t', 'Default': 0}, {'Name': 'DeviceName', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'BatteryType', 'Type': 'uint8_t', 'Enum': 'BATTERY_TYPE_E'}, {'Name': 'HardwareRevision', 'Type': 'uint8_t'}, {'Name': 'SerialNumber', 'Type': 'uint32_t'}, {'Name': 'DeviceName', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'DeviceName', 'Type': 'uint8_t *', 'MaxLength': 24}]
+    _RSP_PARAMS = [{'Name': 'DeviceName', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, device_name, modify=0, battery_type=0, hardware_revision=0, serial_number=0):
+    def builder(cls, device_name, modify=0):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
-            "BatteryType": battery_type,
-            "HardwareRevision": hardware_revision,
-            "SerialNumber": serial_number,
             "DeviceName": device_name,
         }
         return msg
@@ -353,17 +440,35 @@ class MsgSoftReset(MessageDefinition):
         return msg
 
 
-class MsgLoopback(MessageDefinition):
-    _MSG_NAME = "Loopback"
+class MsgMfrOtp(MessageDefinition):
+    _MSG_NAME = "MfrOtp"
     _CMD_CODE = 3
-    _CMD_PARAMS = [{'Name': 'Handle', 'Type': 'uint8_t'}, {'Name': 'Payload', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'Handle', 'Type': 'uint8_t'}, {'Name': 'Payload', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'SerialNumber', 'Type': 'uint32_t'}, {'Name': 'ModelNumber', 'Type': 'uint32_t'}, {'Name': 'HardwareRevision', 'Type': 'uint8_t *', 'MaxLength': 28}]
+    _RSP_PARAMS = [{'Name': 'SerialNumber', 'Type': 'uint32_t'}, {'Name': 'ModelNumber', 'Type': 'uint32_t'}, {'Name': 'HardwareRevision', 'Type': 'uint8_t *', 'MaxLength': 28}]
 
     @classmethod
-    def builder(cls, handle, payload):
+    def builder(cls, modify, serial_number, model_number, hardware_revision):
         msg = cls()
         msg.parameters = {
-            "Handle": handle,
+            "Modify": modify,
+            "SerialNumber": serial_number,
+            "ModelNumber": model_number,
+            "HardwareRevision": hardware_revision,
+        }
+        return msg
+
+
+class MsgLoopback(MessageDefinition):
+    _MSG_NAME = "Loopback"
+    _CMD_CODE = 4
+    _CMD_PARAMS = [{'Name': 'Periodicity', 'Type': 'uint8_t', 'Range': 'LoopbackPeriodicity'}, {'Name': 'Payload', 'Type': 'uint8_t *', 'MaxLength': 256}]
+    _RSP_PARAMS = [{'Name': 'Periodicity', 'Type': 'uint8_t'}, {'Name': 'Payload', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, periodicity, payload):
+        msg = cls()
+        msg.parameters = {
+            "Periodicity": periodicity,
             "Payload": payload,
         }
         return msg
@@ -371,68 +476,67 @@ class MsgLoopback(MessageDefinition):
 
 class MsgPinConfig(MessageDefinition):
     _MSG_NAME = "PinConfig"
-    _CMD_CODE = 4
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PinIndex', 'Type': 'uint8_t'}, {'Name': 'Function', 'Type': 'uint8_t', 'Enum': 'PinFunction', 'Default': 0}, {'Name': 'Instance', 'Type': 'uint8_t', 'Default': 255}]
-    _RSP_PARAMS = [{'Name': 'PinIndex', 'Type': 'uint8_t'}, {'Name': 'Function', 'Type': 'uint8_t', 'Enum': 'PinFunction'}, {'Name': 'Instance', 'Type': 'uint8_t'}]
+    _CMD_CODE = 5
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PinIndex', 'Type': 'uint8_t', 'Range': 'PinIndex', 'Index': True}, {'Name': 'Function', 'Type': 'uint8_t', 'Enum': 'PinFunction', 'Default': 0}, {'Name': 'Instance', 'Type': 'int8_t', 'Range': 'OptionalInstance', 'Default': -1}, {'Name': 'PinName', 'Type': 'uint8_t *', 'MaxLength': 24}]
+    _RSP_PARAMS = [{'Name': 'PinIndex', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Function', 'Type': 'uint8_t', 'Enum': 'PinFunction'}, {'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'PinName', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, pin_index, modify=0, function=0, instance=255):
+    def builder(cls, pin_index, pin_name, modify=0, function=0, instance=-1):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
             "PinIndex": pin_index,
             "Function": function,
             "Instance": instance,
+            "PinName": pin_name,
         }
         return msg
 
 
 class MsgPinControl(MessageDefinition):
     _MSG_NAME = "PinControl"
-    _CMD_CODE = 5
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'DriveStrength', 'Type': 'uint8_t', 'Enum': 'DriveStrength', 'Default': 0}, {'Name': 'OutputState', 'Type': 'uint8_t', 'Default': 0}, {'Name': 'PinControlName', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'DriveConfig', 'Type': 'uint8_t'}, {'Name': 'OutputState', 'Type': 'uint8_t'}, {'Name': 'PinControlName', 'Type': 'uint8_t *'}]
+    _CMD_CODE = 6
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'PinControlInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'DriveStrength', 'Type': 'uint8_t', 'Enum': 'DriveStrength', 'Default': 0}, {'Name': 'OutputState', 'Type': 'uint8_t', 'Range': 'Boolean', 'Default': 0}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'DriveStrength', 'Type': 'uint8_t'}, {'Name': 'OutputState', 'Type': 'uint8_t'}]
 
     @classmethod
-    def builder(cls, instance, pin_control_name, modify=0, drive_strength=0, output_state=0):
+    def builder(cls, instance, modify=0, drive_strength=0, output_state=0):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
             "Modify": modify,
             "DriveStrength": drive_strength,
             "OutputState": output_state,
-            "PinControlName": pin_control_name,
         }
         return msg
 
 
 class MsgPinMonitor(MessageDefinition):
     _MSG_NAME = "PinMonitor"
-    _CMD_CODE = 6
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'MODIFY_E', 'Default': 0}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'PULL_CFG_E', 'Default': 0}, {'Name': 'SenseConfig', 'Type': 'uint8_t', 'Enum': 'SENSE_CFG_E', 'Default': 0}, {'Name': 'PinMonitorName', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'PULL_CFG_E'}, {'Name': 'SenseConfig', 'Type': 'uint8_t', 'Enum': 'SENSE_CFG_E'}, {'Name': 'PinStatus', 'Type': 'uint8_t'}, {'Name': 'PinMonitorName', 'Type': 'uint8_t *'}]
+    _CMD_CODE = 7
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'PinMonitorInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'PullConfig', 'Default': 0}, {'Name': 'SenseConfig', 'Type': 'uint8_t', 'Enum': 'SenseConfig', 'Default': 0}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'PullConfig'}, {'Name': 'SenseConfig', 'Type': 'uint8_t', 'Enum': 'SenseConfig'}, {'Name': 'PinStatus', 'Type': 'uint8_t'}]
 
     @classmethod
-    def builder(cls, instance, pin_monitor_name, modify=0, pull_config=0, sense_config=0):
+    def builder(cls, instance, modify=0, pull_config=0, sense_config=0):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
             "Modify": modify,
             "PullConfig": pull_config,
             "SenseConfig": sense_config,
-            "PinMonitorName": pin_monitor_name,
         }
         return msg
 
 
 class MsgTwimInit(MessageDefinition):
     _MSG_NAME = "TwimInit"
-    _CMD_CODE = 7
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'MODIFY_E', 'Default': 0}, {'Name': 'SclPin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'SdaPin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'Frequency', 'Type': 'uint8_t', 'Enum': 'I2C_FREQ_E', 'Default': 2}]
-    _RSP_PARAMS = [{'Name': 'SclPin', 'Type': 'uint8_t'}, {'Name': 'SdaPin', 'Type': 'uint8_t'}, {'Name': 'Frequency', 'Type': 'uint8_t', 'Enum': 'I2C_FREQ_E'}]
+    _CMD_CODE = 8
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'SclPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'SdaPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'Frequency', 'Type': 'uint8_t', 'Enum': 'I2cFreq', 'Default': 2}]
+    _RSP_PARAMS = [{'Name': 'SclPin', 'Type': 'uint8_t'}, {'Name': 'SdaPin', 'Type': 'uint8_t'}, {'Name': 'Frequency', 'Type': 'uint8_t', 'Enum': 'I2cFreq'}]
 
     @classmethod
-    def builder(cls, modify=0, scl_pin=255, sda_pin=255, frequency=2):
+    def builder(cls, modify=0, scl_pin=-1, sda_pin=-1, frequency=2):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
@@ -445,7 +549,7 @@ class MsgTwimInit(MessageDefinition):
 
 class MsgTwimDisconnect(MessageDefinition):
     _MSG_NAME = "TwimDisconnect"
-    _CMD_CODE = 8
+    _CMD_CODE = 9
     _CMD_PARAMS = []
     _RSP_PARAMS = []
 
@@ -459,7 +563,7 @@ class MsgTwimDisconnect(MessageDefinition):
 
 class MsgTwimScan(MessageDefinition):
     _MSG_NAME = "TwimScan"
-    _CMD_CODE = 9
+    _CMD_CODE = 10
     _CMD_PARAMS = [{'Name': 'TestByte', 'Type': 'uint8_t', 'Description': 'Byte of data used to attempt an I2C write.'}]
     _RSP_PARAMS = [{'Name': 'SlaveAddress', 'Type': 'uint8_t'}, {'Name': 'TotalFound', 'Type': 'uint8_t'}]
 
@@ -474,12 +578,12 @@ class MsgTwimScan(MessageDefinition):
 
 class MsgTwimTransfer(MessageDefinition):
     _MSG_NAME = "TwimTransfer"
-    _CMD_CODE = 10
-    _CMD_PARAMS = [{'Name': 'Handle', 'Type': 'uint8_t', 'Description': 'Software specified operation handle copied by firmware to the response message'}, {'Name': 'SlaveAddress', 'Type': 'uint8_t'}, {'Name': 'ReadLength', 'Type': 'uint16_t'}, {'Name': 'WriteData', 'Type': 'uint8_t *'}]
+    _CMD_CODE = 11
+    _CMD_PARAMS = [{'Name': 'Handle', 'Type': 'uint8_t', 'Description': 'Software specified operation handle copied by firmware to the response message', 'Default': 0}, {'Name': 'SlaveAddress', 'Type': 'uint8_t', 'Range': 'TwimAddress'}, {'Name': 'ReadLength', 'Type': 'uint16_t', 'Range': 'BufferLimited'}, {'Name': 'WriteData', 'Type': 'uint8_t *'}]
     _RSP_PARAMS = [{'Name': 'Handle', 'Type': 'uint8_t', 'Description': 'Copy of Handle provided in command packet, not relevant to firmware, but this can be used to identify responses in software when multiple concurrent transfers are in progress.'}, {'Name': 'ActualWriteLength', 'Type': 'uint16_t', 'Description': 'Actual size written, if a write was attempted but no I2C ack is received, this will be zero.'}, {'Name': 'ActualReadData', 'Type': 'uint8_t *', 'Description': 'Actual size read, if a read was attempted but no I2C ack is received, this will be zero.'}]
 
     @classmethod
-    def builder(cls, handle, slave_address, read_length, write_data):
+    def builder(cls, slave_address, read_length, write_data, handle=0):
         msg = cls()
         msg.parameters = {
             "Handle": handle,
@@ -492,12 +596,12 @@ class MsgTwimTransfer(MessageDefinition):
 
 class MsgSpiInit(MessageDefinition):
     _MSG_NAME = "SpiInit"
-    _CMD_CODE = 11
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'MODIFY_E', 'Default': 0}, {'Name': 'ClkPin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'MosiPin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'MisoPin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'Frequency', 'Type': 'uint8_t', 'Enum': 'SpiFreq', 'Default': 3}]
+    _CMD_CODE = 12
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ClkPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'MosiPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'MisoPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'Frequency', 'Type': 'uint8_t', 'Enum': 'SpiFreq', 'Default': 3}]
     _RSP_PARAMS = [{'Name': 'ClkPin', 'Type': 'uint8_t'}, {'Name': 'MosiPin', 'Type': 'uint8_t'}, {'Name': 'MisoPin', 'Type': 'uint8_t'}, {'Name': 'Frequency', 'Type': 'uint8_t', 'Enum': 'SpiFreq'}]
 
     @classmethod
-    def builder(cls, modify=0, clk_pin=255, mosi_pin=255, miso_pin=255, frequency=3):
+    def builder(cls, modify=0, clk_pin=-1, mosi_pin=-1, miso_pin=-1, frequency=3):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
@@ -511,7 +615,7 @@ class MsgSpiInit(MessageDefinition):
 
 class MsgSpiDisconnect(MessageDefinition):
     _MSG_NAME = "SpiDisconnect"
-    _CMD_CODE = 12
+    _CMD_CODE = 13
     _CMD_PARAMS = []
     _RSP_PARAMS = []
 
@@ -525,8 +629,8 @@ class MsgSpiDisconnect(MessageDefinition):
 
 class MsgSpiTransfer(MessageDefinition):
     _MSG_NAME = "SpiTransfer"
-    _CMD_CODE = 13
-    _CMD_PARAMS = [{'Name': 'Handle', 'Type': 'uint8_t'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'ReadLength', 'Type': 'uint16_t'}, {'Name': 'WriteData', 'Type': 'uint8_t *'}]
+    _CMD_CODE = 14
+    _CMD_PARAMS = [{'Name': 'Handle', 'Type': 'uint8_t'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'ReadLength', 'Type': 'uint16_t', 'Range': 'BufferLimited'}, {'Name': 'WriteData', 'Type': 'uint8_t *'}]
     _RSP_PARAMS = [{'Name': 'Handle', 'Type': 'uint8_t'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'WriteLength', 'Type': 'uint16_t'}, {'Name': 'ReadData', 'Type': 'uint8_t *'}]
 
     @classmethod
@@ -543,12 +647,12 @@ class MsgSpiTransfer(MessageDefinition):
 
 class MsgSpiFlashInit(MessageDefinition):
     _MSG_NAME = "SpiFlashInit"
-    _CMD_CODE = 14
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ChipSelectPin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'WriteProtectPin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'ResetPin', 'Type': 'uint8_t', 'Default': 255}]
+    _CMD_CODE = 15
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ChipSelectPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'WriteProtectPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'ResetPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}]
     _RSP_PARAMS = [{'Name': 'FlashModel', 'Type': 'uint8_t', 'Enum': 'FlashModel'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'WpPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'RstPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'DeviceId', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, modify=0, chip_select_pin=255, write_protect_pin=255, reset_pin=255):
+    def builder(cls, modify=0, chip_select_pin=-1, write_protect_pin=-1, reset_pin=-1):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
@@ -561,7 +665,7 @@ class MsgSpiFlashInit(MessageDefinition):
 
 class MsgSpiFlashDisconnect(MessageDefinition):
     _MSG_NAME = "SpiFlashDisconnect"
-    _CMD_CODE = 15
+    _CMD_CODE = 16
     _CMD_PARAMS = []
     _RSP_PARAMS = []
 
@@ -575,8 +679,8 @@ class MsgSpiFlashDisconnect(MessageDefinition):
 
 class MsgSpiFlashErase(MessageDefinition):
     _MSG_NAME = "SpiFlashErase"
-    _CMD_CODE = 16
-    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
+    _CMD_CODE = 17
+    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
     _RSP_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
 
     @classmethod
@@ -592,8 +696,8 @@ class MsgSpiFlashErase(MessageDefinition):
 
 class MsgSpiFlashRead(MessageDefinition):
     _MSG_NAME = "SpiFlashRead"
-    _CMD_CODE = 17
-    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
+    _CMD_CODE = 18
+    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t', 'Range': 'BufferLimited'}]
     _RSP_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Data', 'Type': 'uint8_t *'}]
 
     @classmethod
@@ -609,8 +713,8 @@ class MsgSpiFlashRead(MessageDefinition):
 
 class MsgSpiFlashWrite(MessageDefinition):
     _MSG_NAME = "SpiFlashWrite"
-    _CMD_CODE = 18
-    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Data', 'Type': 'uint8_t *'}]
+    _CMD_CODE = 19
+    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Data', 'Type': 'uint8_t *'}]
     _RSP_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
 
     @classmethod
@@ -626,16 +730,15 @@ class MsgSpiFlashWrite(MessageDefinition):
 
 class MsgAccelInit(MessageDefinition):
     _MSG_NAME = "AccelInit"
-    _CMD_CODE = 19
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'AccelModel', 'Type': 'uint8_t', 'Enum': 'SensorModel'}, {'Name': 'ChipSelectPin', 'Type': 'uint8_t', 'Description': 'Set to 0xFF for I2C mode.', 'Default': 255}, {'Name': 'Int1Pin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'Int2Pin', 'Type': 'uint8_t', 'Default': 255}]
+    _CMD_CODE = 20
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ChipSelectPin', 'Type': 'int8_t', 'Description': 'Set to 0xFF for I2C mode.', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'Int1Pin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'Int2Pin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}]
     _RSP_PARAMS = [{'Name': 'AccelModel', 'Type': 'uint8_t', 'Enum': 'SensorModel'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Int1Pin', 'Type': 'uint8_t'}, {'Name': 'Int2Pin', 'Type': 'uint8_t'}]
 
     @classmethod
-    def builder(cls, accel_model, modify=0, chip_select_pin=255, int1_pin=255, int2_pin=255):
+    def builder(cls, modify=0, chip_select_pin=-1, int1_pin=-1, int2_pin=-1):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
-            "AccelModel": accel_model,
             "ChipSelectPin": chip_select_pin,
             "Int1Pin": int1_pin,
             "Int2Pin": int2_pin,
@@ -645,7 +748,7 @@ class MsgAccelInit(MessageDefinition):
 
 class MsgAccelUninit(MessageDefinition):
     _MSG_NAME = "AccelUninit"
-    _CMD_CODE = 20
+    _CMD_CODE = 21
     _CMD_PARAMS = []
     _RSP_PARAMS = []
 
@@ -659,9 +762,9 @@ class MsgAccelUninit(MessageDefinition):
 
 class MsgAccelStream(MessageDefinition):
     _MSG_NAME = "AccelStream"
-    _CMD_CODE = 21
-    _CMD_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AccelDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AccelDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t'}]
-    _RSP_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AccelDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AccelDataRate'}, {'Name': 'AccelData', 'Type': 'uint8_t *'}]
+    _CMD_CODE = 22
+    _CMD_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AccelDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AccelDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AccelWatermark'}]
+    _RSP_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AccelDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AccelDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t'}, {'Name': 'AccelData', 'Type': 'uint8_t *'}]
 
     @classmethod
     def builder(cls, data_range, data_rate, watermark):
@@ -670,22 +773,6 @@ class MsgAccelStream(MessageDefinition):
             "DataRange": data_range,
             "DataRate": data_rate,
             "Watermark": watermark,
-        }
-        return msg
-
-
-class MsgAccelEvents(MessageDefinition):
-    _MSG_NAME = "AccelEvents"
-    _CMD_CODE = 22
-    _CMD_PARAMS = [{'Name': 'EnableEvents', 'Type': 'uint8_t'}, {'Name': 'DisableEvents', 'Type': 'uint8_t'}]
-    _RSP_PARAMS = [{'Name': 'Enabled', 'Type': 'uint8_t'}]
-
-    @classmethod
-    def builder(cls, enable_events, disable_events):
-        msg = cls()
-        msg.parameters = {
-            "EnableEvents": enable_events,
-            "DisableEvents": disable_events,
         }
         return msg
 
@@ -707,11 +794,11 @@ class MsgSensorEvent(MessageDefinition):
 class MsgGyroInit(MessageDefinition):
     _MSG_NAME = "GyroInit"
     _CMD_CODE = 24
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'GyroModel', 'Type': 'uint8_t', 'Enum': 'SensorModel'}, {'Name': 'ChipSelectPin', 'Type': 'uint8_t', 'Description': 'Set to 0xFF for I2C mode.', 'Default': 255}, {'Name': 'Int1Pin', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'Int2Pin', 'Type': 'uint8_t', 'Default': 255}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'GyroModel', 'Type': 'uint8_t', 'Enum': 'SensorModel', 'Default': 2}, {'Name': 'ChipSelectPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Description': 'Set to 0xFF for I2C mode.', 'Default': -1}, {'Name': 'Int1Pin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'Int2Pin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}]
     _RSP_PARAMS = [{'Name': 'GyroModel', 'Type': 'uint8_t', 'Enum': 'SensorModel'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Int1Pin', 'Type': 'uint8_t'}, {'Name': 'Int2Pin', 'Type': 'uint8_t'}]
 
     @classmethod
-    def builder(cls, gyro_model, modify=0, chip_select_pin=255, int1_pin=255, int2_pin=255):
+    def builder(cls, modify=0, gyro_model=2, chip_select_pin=-1, int1_pin=-1, int2_pin=-1):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
@@ -740,8 +827,8 @@ class MsgGyroUninit(MessageDefinition):
 class MsgGyroStream(MessageDefinition):
     _MSG_NAME = "GyroStream"
     _CMD_CODE = 26
-    _CMD_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'GyroDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'GyroDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t'}]
-    _RSP_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'GyroDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'GyroDataRate'}, {'Name': 'GyroData', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'GyroDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'GyroDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'GyroWatermark'}]
+    _RSP_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'GyroDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'GyroDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t'}, {'Name': 'GyroData', 'Type': 'uint8_t *'}]
 
     @classmethod
     def builder(cls, data_range, data_rate, watermark):
@@ -754,17 +841,18 @@ class MsgGyroStream(MessageDefinition):
         return msg
 
 
-class MsgAnalogMeasurement(MessageDefinition):
-    _MSG_NAME = "AnalogMeasurement"
+class MsgPinAnalogInput(MessageDefinition):
+    _MSG_NAME = "PinAnalogInput"
     _CMD_CODE = 27
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'SaadcPullConfig'}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain'}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel'}, {'Name': 'Tacq', 'Type': 'uint8_t', 'Enum': 'SaadcTacq'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Measurement', 'Type': 'int16_t'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'AnalogInputInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'SaadcPullConfig', 'Default': 0}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain', 'Default': 0}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel', 'Default': 0}, {'Name': 'Tacq', 'Type': 'uint8_t', 'Enum': 'SaadcTacq'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'SaadcPullConfig'}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain'}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel'}, {'Name': 'Tacq', 'Type': 'uint8_t', 'Enum': 'SaadcTacq'}, {'Name': 'Measurement', 'Type': 'int16_t'}]
 
     @classmethod
-    def builder(cls, instance, pull_config, gain, ref_sel, tacq):
+    def builder(cls, instance, tacq, modify=0, pull_config=0, gain=0, ref_sel=0):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
+            "Modify": modify,
             "PullConfig": pull_config,
             "Gain": gain,
             "RefSel": ref_sel,
@@ -776,37 +864,36 @@ class MsgAnalogMeasurement(MessageDefinition):
 class MsgAnalogStream(MessageDefinition):
     _MSG_NAME = "AnalogStream"
     _CMD_CODE = 28
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'SaadcPullConfig'}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain'}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel'}, {'Name': 'Tacq', 'Type': 'uint8_t', 'Enum': 'SaadcTacq'}, {'Name': 'SamplePeriodMicroSec', 'Type': 'uint32_t'}, {'Name': 'Watermark', 'Type': 'uint8_t'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'AdcData', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'AnalogInputInstance', 'Index': True}, {'Name': 'SamplePeriodMicroSec', 'Type': 'uint32_t', 'Range': 'AdcSamplePeriod'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AdcWatermark'}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain'}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'SamplePeriodMicroSec', 'Type': 'uint32_t'}, {'Name': 'Watermark', 'Type': 'uint8_t'}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain'}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel'}, {'Name': 'AdcData', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, instance, pull_config, gain, ref_sel, tacq, sample_period_micro_sec, watermark):
+    def builder(cls, instance, sample_period_micro_sec, watermark, gain, ref_sel):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
-            "PullConfig": pull_config,
-            "Gain": gain,
-            "RefSel": ref_sel,
-            "Tacq": tacq,
             "SamplePeriodMicroSec": sample_period_micro_sec,
             "Watermark": watermark,
+            "Gain": gain,
+            "RefSel": ref_sel,
         }
         return msg
 
 
-class MsgRgbRunLenEnc(MessageDefinition):
-    _MSG_NAME = "RgbRunLenEnc"
+class MsgPinLedData(MessageDefinition):
+    _MSG_NAME = "PinLedData"
     _CMD_CODE = 29
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationPeriodMs', 'Type': 'uint32_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t', 'Description': '0: None, 1: Rotation'}, {'Name': 'Encoding', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationPeriodMs', 'Type': 'uint32_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t'}, {'Name': 'Encoding', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'RgbColorBytes', 'Type': 'uint8_t', 'Enum': 'RgbColorBytes', 'Default': 1}, {'Name': 'LedLength', 'Type': 'uint16_t', 'Range': 'LedLength'}, {'Name': 'AnimationLength', 'Type': 'uint16_t', 'Default': 0}, {'Name': 'AnimationPeriodMs', 'Type': 'uint16_t', 'Range': 'AnimationPeriod'}, {'Name': 'AnimationType', 'Type': 'uint8_t', 'Enum': 'AnimationType'}, {'Name': 'Encoding', 'Type': 'uint8_t *', 'DataStructure': 'RgbRunLengthEncoding', 'MaxLength': 'BufferLimited'}]
+    _RSP_PARAMS = [{'Name': 'RgbColorBytes', 'Type': 'uint8_t', 'Enum': 'RgbColorBytes'}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationLength', 'Type': 'uint16_t'}, {'Name': 'AnimationPeriodMs', 'Type': 'uint32_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t'}, {'Name': 'Encoding', 'Type': 'uint8_t *', 'DataStructure': 'RgbRunLengthEncoding'}]
 
     @classmethod
-    def builder(cls, instance, led_length, animation_period_ms, animation_type, encoding, modify=0):
+    def builder(cls, led_length, animation_period_ms, animation_type, encoding, modify=0, rgb_color_bytes=1, animation_length=0):
         msg = cls()
         msg.parameters = {
-            "Instance": instance,
             "Modify": modify,
+            "RgbColorBytes": rgb_color_bytes,
             "LedLength": led_length,
+            "AnimationLength": animation_length,
             "AnimationPeriodMs": animation_period_ms,
             "AnimationType": animation_type,
             "Encoding": encoding,
@@ -814,11 +901,11 @@ class MsgRgbRunLenEnc(MessageDefinition):
         return msg
 
 
-class MsgServoConfig(MessageDefinition):
-    _MSG_NAME = "ServoConfig"
+class MsgPinServoPulse(MessageDefinition):
+    _MSG_NAME = "PinServoPulse"
     _CMD_CODE = 30
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PwmLowLimit', 'Type': 'uint16_t', 'Default': 600}, {'Name': 'PwmHighLimit', 'Type': 'uint16_t', 'Default': 2500}, {'Name': 'DownSpeedLimit', 'Type': 'uint16_t', 'Default': 1900}, {'Name': 'UpSpeedLimit', 'Type': 'uint16_t', 'Default': 1900}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PwmLowLimit', 'Type': 'uint16_t'}, {'Name': 'PwmHighLimit', 'Type': 'uint16_t'}, {'Name': 'DownSpeedLimit', 'Type': 'uint16_t'}, {'Name': 'UpSpeedLimit', 'Type': 'uint16_t'}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'ServoInstance', 'Index': True}, {'Name': 'Channel', 'Type': 'uint8_t', 'Range': 'ServoChannel'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PwmLowLimit', 'Type': 'uint16_t', 'Range': 'ServoPwm', 'Default': 600}, {'Name': 'PwmHighLimit', 'Type': 'uint16_t', 'Range': 'ServoPwm', 'Default': 2500}, {'Name': 'DownSpeedLimit', 'Type': 'uint16_t', 'Range': 'ServoPwm', 'Default': 1900}, {'Name': 'UpSpeedLimit', 'Type': 'uint16_t', 'Range': 'ServoPwm', 'Default': 1900}, {'Name': 'ServoName', 'Type': 'uint8_t *', 'MaxLength': 24}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PwmLowLimit', 'Type': 'uint16_t'}, {'Name': 'PwmHighLimit', 'Type': 'uint16_t'}, {'Name': 'DownSpeedLimit', 'Type': 'uint16_t'}, {'Name': 'UpSpeedLimit', 'Type': 'uint16_t'}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
 
     @classmethod
     def builder(cls, instance, channel, servo_name, modify=0, pwm_low_limit=600, pwm_high_limit=2500, down_speed_limit=1900, up_speed_limit=1900):
@@ -839,8 +926,8 @@ class MsgServoConfig(MessageDefinition):
 class MsgServoControl(MessageDefinition):
     _MSG_NAME = "ServoControl"
     _CMD_CODE = 31
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t', 'Description': 'There are 8 channels per module, 0b000 through 0b111.'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PulseWidth', 'Type': 'uint16_t', 'Description': 'Microseconds.'}, {'Name': 'MoveSpeed', 'Type': 'uint16_t', 'Default': 1900, 'Description': 'Maximum change per 20ms from the current pulse width.'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}, {'Name': 'MoveSpeed', 'Type': 'uint16_t'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'ServoInstance', 'Index': True}, {'Name': 'Channel', 'Type': 'uint8_t', 'Range': 'ServoChannel'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PulseWidth', 'Type': 'uint16_t', 'Range': 'ServoPwm'}, {'Name': 'MoveSpeed', 'Type': 'uint16_t', 'Range': 'ServoPwm', 'Default': 1900, 'Description': 'Maximum change per 20ms from the current pulse width.'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}, {'Name': 'MoveSpeed', 'Type': 'uint16_t'}]
 
     @classmethod
     def builder(cls, instance, channel, pulse_width, modify=0, move_speed=1900):
@@ -855,11 +942,11 @@ class MsgServoControl(MessageDefinition):
         return msg
 
 
-class MsgRobotisConfig(MessageDefinition):
-    _MSG_NAME = "RobotisConfig"
+class MsgPinRobotis(MessageDefinition):
+    _MSG_NAME = "PinRobotis"
     _CMD_CODE = 32
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ServoId', 'Type': 'uint8_t'}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'ServoId', 'Type': 'uint8_t'}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ServoId', 'Type': 'uint8_t', 'Index': True}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'ServoId', 'Type': 'uint8_t', 'Index': True}, {'Name': 'ServoName', 'Type': 'uint8_t *'}]
 
     @classmethod
     def builder(cls, servo_id, servo_name, modify=0):
@@ -875,8 +962,8 @@ class MsgRobotisConfig(MessageDefinition):
 class MsgRobotisCommand(MessageDefinition):
     _MSG_NAME = "RobotisCommand"
     _CMD_CODE = 33
-    _CMD_PARAMS = [{'Name': 'ServoId', 'Type': 'uint8_t'}, {'Name': 'Instruction', 'Type': 'uint8_t', 'Description': '1:Ping, 2:Read, 3:Write, 4:RegWrite, 5:Action, 6:FactoryReset, 7:Reboot, 8:SyncWrite, 9:BulkRead'}, {'Name': 'Parameters', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'BytesSent', 'Type': 'uint32_t'}, {'Name': 'ResponseServoId', 'Type': 'uint8_t'}, {'Name': 'ResponseErrorStatus', 'Type': 'uint8_t'}, {'Name': 'ResponseParameters', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'ServoId', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Instruction', 'Type': 'uint8_t', 'Description': '1:Ping, 2:Read, 3:Write, 4:RegWrite, 5:Action, 6:FactoryReset, 7:Reboot, 8:SyncWrite, 9:BulkRead'}, {'Name': 'Parameters', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'BytesSent', 'Type': 'uint32_t'}, {'Name': 'ResponseServoId', 'Type': 'uint8_t', 'Index': True}, {'Name': 'ResponseErrorStatus', 'Type': 'uint8_t'}, {'Name': 'ResponseParameters', 'Type': 'uint8_t *'}]
 
     @classmethod
     def builder(cls, servo_id, instruction, parameters):
@@ -889,11 +976,11 @@ class MsgRobotisCommand(MessageDefinition):
         return msg
 
 
-class MsgPwmChannelConfig(MessageDefinition):
-    _MSG_NAME = "PwmChannelConfig"
+class MsgPinPwmChannel(MessageDefinition):
+    _MSG_NAME = "PinPwmChannel"
     _CMD_CODE = 34
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'MinPeriod', 'Type': 'uint16_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint16_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint16_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'MinPeriod', 'Type': 'uint16_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint16_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint16_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'PwmInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'MinPeriod', 'Type': 'uint16_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint16_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint16_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'MinPeriod', 'Type': 'uint16_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint16_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint16_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
 
     @classmethod
     def builder(cls, instance, modify, min_period, min_pulse_width, max_pulse_width, channel_name):
@@ -912,29 +999,52 @@ class MsgPwmChannelConfig(MessageDefinition):
 class MsgPwmChannelControl(MessageDefinition):
     _MSG_NAME = "PwmChannelControl"
     _CMD_CODE = 35
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'PwmInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}]
 
     @classmethod
-    def builder(cls, instance, channel, modify, pulse_width):
+    def builder(cls, instance, modify, pulse_width):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
-            "Channel": channel,
             "Modify": modify,
             "PulseWidth": pulse_width,
         }
         return msg
 
 
-class MsgConnParamUpdate(MessageDefinition):
-    _MSG_NAME = "ConnParamUpdate"
+class MsgAdvertisingConfig(MessageDefinition):
+    _MSG_NAME = "AdvertisingConfig"
     _CMD_CODE = 36
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ConnHandle', 'Type': 'uint8_t', 'Default': 255}, {'Name': 'ConnIntervalMin_1p25ms', 'Type': 'uint16_t', 'Default': 6}, {'Name': 'ConnIntervalMax_1p25ms', 'Type': 'uint16_t', 'Default': 16}, {'Name': 'SlaveLatency', 'Type': 'uint8_t', 'Default': 4}, {'Name': 'ConnSupTimeout_10ms', 'Type': 'uint16_t', 'Default': 400}, {'Name': 'ConnTxPower', 'Type': 'int8_t', 'Default': 0}, {'Name': 'ConnPhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding', 'Default': 0}]
-    _RSP_PARAMS = [{'Name': 'ConnHandle', 'Type': 'uint8_t'}, {'Name': 'ConnInterval', 'Type': 'uint16_t'}, {'Name': 'ConnIntervalMin_1p25ms', 'Type': 'uint16_t', 'Default': 6}, {'Name': 'ConnIntervalMax_1p25ms', 'Type': 'uint16_t', 'Default': 16}, {'Name': 'SlaveLatency', 'Type': 'uint8_t', 'Default': 4}, {'Name': 'ConnSupTimeout_10ms', 'Type': 'uint16_t'}, {'Name': 'ConnTxPower', 'Type': 'int8_t'}, {'Name': 'ConnPhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'Interval_0p625ms', 'Type': 'uint16_t', 'Range': 'AdvIntervalRange', 'Default': 300}, {'Name': 'TxPower', 'Type': 'uint8_t', 'Enum': 'TxPower', 'Default': 9}, {'Name': 'PrimaryPhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding', 'Default': 0}, {'Name': 'SecondaryPhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding', 'Default': 0}, {'Name': 'AdvType', 'Type': 'uint8_t', 'Enum': 'AdvertisingType', 'Default': 0}, {'Name': 'AdvName', 'Type': 'uint8_t', 'Enum': 'AdvertiseIn', 'Default': 1}, {'Name': 'AdvService128Bit', 'Type': 'uint8_t', 'Enum': 'AdvertiseIn', 'Default': 2}, {'Name': 'AdvMfrSpecificData', 'Type': 'uint8_t', 'Enum': 'AdvertiseIn', 'Default': 2}, {'Name': 'MfrSpecificDataLength', 'Type': 'uint8_t', 'Default': 16}]
+    _RSP_PARAMS = [{'Name': 'Interval_0p625ms', 'Type': 'uint16_t', 'Range': 'AdvIntervalRange'}, {'Name': 'TxPower', 'Type': 'uint8_t'}, {'Name': 'PrimaryPhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding'}, {'Name': 'SecondaryPhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding'}, {'Name': 'AdvType', 'Type': 'uint8_t', 'Enum': 'AdvertisingType', 'Default': 0}, {'Name': 'AdvName', 'Type': 'uint8_t', 'Enum': 'AdvertiseIn'}, {'Name': 'AdvService128Bit', 'Type': 'uint8_t', 'Enum': 'AdvertiseIn'}, {'Name': 'AdvMfrSpecificData', 'Type': 'uint8_t', 'Enum': 'AdvertiseIn'}, {'Name': 'MfrSpecificDataLength', 'Type': 'uint8_t'}]
 
     @classmethod
-    def builder(cls, modify=0, conn_handle=255, conn_interval_min_1p25ms=6, conn_interval_max_1p25ms=16, slave_latency=4, conn_sup_timeout_10ms=400, conn_tx_power=0, conn_phy_coding=0):
+    def builder(cls, modify=0, interval_0p625ms=300, tx_power=9, primary_phy_coding=0, secondary_phy_coding=0, adv_type=0, adv_name=1, adv_service128_bit=2, adv_mfr_specific_data=2, mfr_specific_data_length=16):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "Interval_0p625ms": interval_0p625ms,
+            "TxPower": tx_power,
+            "PrimaryPhyCoding": primary_phy_coding,
+            "SecondaryPhyCoding": secondary_phy_coding,
+            "AdvType": adv_type,
+            "AdvName": adv_name,
+            "AdvService128Bit": adv_service128_bit,
+            "AdvMfrSpecificData": adv_mfr_specific_data,
+            "MfrSpecificDataLength": mfr_specific_data_length,
+        }
+        return msg
+
+
+class MsgConnParamUpdate(MessageDefinition):
+    _MSG_NAME = "ConnParamUpdate"
+    _CMD_CODE = 37
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ConnHandle', 'Type': 'uint8_t', 'Default': 0, 'Index': True}, {'Name': 'ConnIntervalMin_1p25ms', 'Type': 'uint16_t', 'Range': 'ConnInterval', 'Default': 6}, {'Name': 'ConnIntervalMax_1p25ms', 'Type': 'uint16_t', 'Range': 'ConnInterval', 'Default': 16}, {'Name': 'SlaveLatency', 'Type': 'uint8_t', 'Default': 4}, {'Name': 'ConnSupTimeout_10ms', 'Type': 'uint16_t', 'Default': 400}]
+    _RSP_PARAMS = [{'Name': 'ConnHandle', 'Type': 'uint8_t', 'Index': True}, {'Name': 'ConnIntervalMin_1p25ms', 'Type': 'uint16_t'}, {'Name': 'ConnIntervalMax_1p25ms', 'Type': 'uint16_t'}, {'Name': 'SlaveLatency', 'Type': 'uint8_t'}, {'Name': 'ConnSupTimeout_10ms', 'Type': 'uint16_t'}, {'Name': 'ConnectionStatus', 'Type': 'uint8_t', 'Enum': 'ConnectionStatus'}, {'Name': 'PeerAddress', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, modify=0, conn_handle=0, conn_interval_min_1p25ms=6, conn_interval_max_1p25ms=16, slave_latency=4, conn_sup_timeout_10ms=400):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
@@ -943,15 +1053,13 @@ class MsgConnParamUpdate(MessageDefinition):
             "ConnIntervalMax_1p25ms": conn_interval_max_1p25ms,
             "SlaveLatency": slave_latency,
             "ConnSupTimeout_10ms": conn_sup_timeout_10ms,
-            "ConnTxPower": conn_tx_power,
-            "ConnPhyCoding": conn_phy_coding,
         }
         return msg
 
 
 class MsgRtcSync(MessageDefinition):
     _MSG_NAME = "RtcSync"
-    _CMD_CODE = 37
+    _CMD_CODE = 38
     _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'SyncValue', 'Type': 'uint32_t'}]
     _RSP_PARAMS = [{'Name': 'CurrentClock', 'Type': 'uint32_t'}, {'Name': 'SyncValue', 'Type': 'uint32_t'}]
 
@@ -965,43 +1073,188 @@ class MsgRtcSync(MessageDefinition):
         return msg
 
 
+class MsgRssiStream(MessageDefinition):
+    _MSG_NAME = "RssiStream"
+    _CMD_CODE = 39
+    _CMD_PARAMS = [{'Name': 'ConnectionHandle', 'Type': 'uint8_t', 'Default': 0, 'Index': True}, {'Name': 'SamplePeriod_100ms', 'Type': 'uint16_t', 'Range': 'RssiSamplePeriod', 'Default': 10}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'RssiWatermark'}]
+    _RSP_PARAMS = [{'Name': 'ConnectionHandle', 'Type': 'uint8_t', 'Index': True}, {'Name': 'SamplePeriod_100ms', 'Type': 'uint16_t'}, {'Name': 'Watermark', 'Type': 'uint8_t'}, {'Name': 'RssiData', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, watermark, connection_handle=0, sample_period_100ms=10):
+        msg = cls()
+        msg.parameters = {
+            "ConnectionHandle": connection_handle,
+            "SamplePeriod_100ms": sample_period_100ms,
+            "Watermark": watermark,
+        }
+        return msg
+
+
+class MsgAccelSteps(MessageDefinition):
+    _MSG_NAME = "AccelSteps"
+    _CMD_CODE = 40
+    _CMD_PARAMS = [{'Name': 'ResetCount', 'Type': 'uint8_t', 'Range': 'Boolean', 'Default': 1}, {'Name': 'SamplePeriod_100ms', 'Type': 'uint16_t', 'Range': 'RssiSamplePeriod', 'Default': 600}]
+    _RSP_PARAMS = [{'Name': 'SamplePeriod_100ms', 'Type': 'uint16_t'}, {'Name': 'CurrentStepCount', 'Type': 'uint32_t'}]
+
+    @classmethod
+    def builder(cls, reset_count=1, sample_period_100ms=600):
+        msg = cls()
+        msg.parameters = {
+            "ResetCount": reset_count,
+            "SamplePeriod_100ms": sample_period_100ms,
+        }
+        return msg
+
+
+class MsgLinkParamUpdate(MessageDefinition):
+    _MSG_NAME = "LinkParamUpdate"
+    _CMD_CODE = 41
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ConnHandle', 'Type': 'uint8_t', 'Default': 0, 'Index': True}, {'Name': 'ConnTxPower', 'Type': 'uint8_t', 'Enum': 'TxPower', 'Default': 9}, {'Name': 'PhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding', 'Default': 0}, {'Name': 'BytesPerPacket', 'Type': 'uint16_t', 'Range': 'BytesPerPacket', 'Default': 27}, {'Name': 'PacketsPerInterval', 'Type': 'uint16_t', 'Range': 'PacketsPerInterval', 'Default': 4}]
+    _RSP_PARAMS = [{'Name': 'ConnTxPower', 'Type': 'uint8_t'}, {'Name': 'ConnHandle', 'Type': 'uint8_t', 'Index': True}, {'Name': 'PhyCoding', 'Type': 'uint8_t', 'Enum': 'PhyCoding'}, {'Name': 'BytesPerPacket', 'Type': 'uint16_t'}, {'Name': 'PacketsPerInterval', 'Type': 'uint16_t'}]
+
+    @classmethod
+    def builder(cls, modify=0, conn_handle=0, conn_tx_power=9, phy_coding=0, bytes_per_packet=27, packets_per_interval=4):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "ConnHandle": conn_handle,
+            "ConnTxPower": conn_tx_power,
+            "PhyCoding": phy_coding,
+            "BytesPerPacket": bytes_per_packet,
+            "PacketsPerInterval": packets_per_interval,
+        }
+        return msg
+
+
+class MsgAccelTapSensitivity(MessageDefinition):
+    _MSG_NAME = "AccelTapSensitivity"
+    _CMD_CODE = 42
+    _CMD_PARAMS = [{'Name': 'Sensitivity', 'Type': 'uint8_t', 'Range': 'TapSensitivity'}]
+    _RSP_PARAMS = [{'Name': 'Sensitivity', 'Type': 'uint8_t'}]
+
+    @classmethod
+    def builder(cls, sensitivity):
+        msg = cls()
+        msg.parameters = {
+            "Sensitivity": sensitivity,
+        }
+        return msg
+
+
+class MsgCentralControl(MessageDefinition):
+    _MSG_NAME = "CentralControl"
+    _CMD_CODE = 43
+    _CMD_PARAMS = [{'Name': 'ScanEnable', 'Type': 'uint8_t', 'Range': 'Boolean', 'Default': 1}, {'Name': 'Connect', 'Type': 'uint8_t', 'Range': 'Boolean', 'Default': 0}, {'Name': 'ActiveScan', 'Type': 'uint8_t', 'Range': 'Boolean', 'Default': 0}, {'Name': 'Interval_0p625us', 'Type': 'uint16_t', 'Range': 'ScanLimits', 'Default': 96}, {'Name': 'Window_0p625us', 'Type': 'uint16_t', 'Range': 'ScanLimits', 'Default': 48}, {'Name': 'Timeout10ms', 'Type': 'uint16_t', 'Range': 'ScanTimeout', 'Default': 1000}, {'Name': 'FilterType', 'Type': 'uint8_t', 'Enum': 'FilterType', 'Default': 2}, {'Name': 'FilterValue', 'Type': 'uint8_t *', 'Default': 'Bluemo'}]
+    _RSP_PARAMS = [{'Name': 'ScanEnable', 'Type': 'uint8_t', 'Range': 'Boolean'}, {'Name': 'Connect', 'Type': 'uint8_t', 'Range': 'Boolean'}, {'Name': 'ActiveScan', 'Type': 'uint8_t', 'Range': 'Boolean'}, {'Name': 'Interval_0p625us', 'Type': 'uint16_t', 'Range': 'ScanLimits'}, {'Name': 'Window_0p625us', 'Type': 'uint16_t', 'Range': 'ScanLimits'}, {'Name': 'Timeout10ms', 'Type': 'uint16_t', 'Range': 'ScanTimeout'}, {'Name': 'FilterType', 'Type': 'uint8_t', 'Enum': 'FilterType'}, {'Name': 'FilterValue', 'Type': 'uint8_t *', 'MaxLength': 32}]
+
+    @classmethod
+    def builder(cls, scan_enable=1, connect=0, active_scan=0, interval_0p625us=96, window_0p625us=48, timeout10ms=1000, filter_type=2, filter_value="Bluemo"):
+        msg = cls()
+        msg.parameters = {
+            "ScanEnable": scan_enable,
+            "Connect": connect,
+            "ActiveScan": active_scan,
+            "Interval_0p625us": interval_0p625us,
+            "Window_0p625us": window_0p625us,
+            "Timeout10ms": timeout10ms,
+            "FilterType": filter_type,
+            "FilterValue": filter_value,
+        }
+        return msg
+
+
+class MsgScanResult(MessageDefinition):
+    _MSG_NAME = "ScanResult"
+    _CMD_CODE = 44
+    _CMD_PARAMS = []
+    _RSP_PARAMS = [{'Name': 'ReportType', 'Type': 'uint16_t'}, {'Name': 'PrimaryPhy', 'Type': 'uint8_t'}, {'Name': 'SecondaryPhy', 'Type': 'uint8_t'}, {'Name': 'TxPower', 'Type': 'int8_t'}, {'Name': 'Rssi', 'Type': 'int8_t'}, {'Name': 'ChannelIndex', 'Type': 'uint8_t'}, {'Name': 'AdvData', 'Type': 'uint8_t *', 'DataStructure': 'ScanResult'}]
+
+    @classmethod
+    def builder(cls):
+        msg = cls()
+        msg.parameters = {
+        }
+        return msg
+
+
+class MsgCentralAction(MessageDefinition):
+    _MSG_NAME = "CentralAction"
+    _CMD_CODE = 45
+    _CMD_PARAMS = [{'Name': 'ConnHandle', 'Type': 'uint16_t', 'Index': True}, {'Name': 'ActionType', 'Type': 'uint8_t', 'Enum': 'ActionType', 'Default': 1}]
+    _RSP_PARAMS = [{'Name': 'ConnHandle', 'Type': 'uint16_t', 'Index': True}, {'Name': 'ActionType', 'Type': 'uint8_t', 'Enum': 'ActionType'}, {'Name': 'VersionInfo', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, conn_handle, action_type=1):
+        msg = cls()
+        msg.parameters = {
+            "ConnHandle": conn_handle,
+            "ActionType": action_type,
+        }
+        return msg
+
+
+class MsgRelayData(MessageDefinition):
+    _MSG_NAME = "RelayData"
+    _CMD_CODE = 46
+    _CMD_PARAMS = [{'Name': 'ConnHandle', 'Type': 'uint16_t', 'Index': True}, {'Name': 'Payload', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'ConnHandle', 'Type': 'uint16_t', 'Index': True}, {'Name': 'Payload', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, conn_handle, payload):
+        msg = cls()
+        msg.parameters = {
+            "ConnHandle": conn_handle,
+            "Payload": payload,
+        }
+        return msg
+
+
 MSG_CLASS_BY_RSP_CODE = {
     128: MsgError,
-    129: MsgDeviceConfig,
+    129: MsgDeviceName,
     130: MsgSoftReset,
-    131: MsgLoopback,
-    132: MsgPinConfig,
-    133: MsgPinControl,
-    134: MsgPinMonitor,
-    135: MsgTwimInit,
-    136: MsgTwimDisconnect,
-    137: MsgTwimScan,
-    138: MsgTwimTransfer,
-    139: MsgSpiInit,
-    140: MsgSpiDisconnect,
-    141: MsgSpiTransfer,
-    142: MsgSpiFlashInit,
-    143: MsgSpiFlashDisconnect,
-    144: MsgSpiFlashErase,
-    145: MsgSpiFlashRead,
-    146: MsgSpiFlashWrite,
-    147: MsgAccelInit,
-    148: MsgAccelUninit,
-    149: MsgAccelStream,
-    150: MsgAccelEvents,
+    131: MsgMfrOtp,
+    132: MsgLoopback,
+    133: MsgPinConfig,
+    134: MsgPinControl,
+    135: MsgPinMonitor,
+    136: MsgTwimInit,
+    137: MsgTwimDisconnect,
+    138: MsgTwimScan,
+    139: MsgTwimTransfer,
+    140: MsgSpiInit,
+    141: MsgSpiDisconnect,
+    142: MsgSpiTransfer,
+    143: MsgSpiFlashInit,
+    144: MsgSpiFlashDisconnect,
+    145: MsgSpiFlashErase,
+    146: MsgSpiFlashRead,
+    147: MsgSpiFlashWrite,
+    148: MsgAccelInit,
+    149: MsgAccelUninit,
+    150: MsgAccelStream,
     151: MsgSensorEvent,
     152: MsgGyroInit,
     153: MsgGyroUninit,
     154: MsgGyroStream,
-    155: MsgAnalogMeasurement,
+    155: MsgPinAnalogInput,
     156: MsgAnalogStream,
-    157: MsgRgbRunLenEnc,
-    158: MsgServoConfig,
+    157: MsgPinLedData,
+    158: MsgPinServoPulse,
     159: MsgServoControl,
-    160: MsgRobotisConfig,
+    160: MsgPinRobotis,
     161: MsgRobotisCommand,
-    162: MsgPwmChannelConfig,
+    162: MsgPinPwmChannel,
     163: MsgPwmChannelControl,
-    164: MsgConnParamUpdate,
-    165: MsgRtcSync,
+    164: MsgAdvertisingConfig,
+    165: MsgConnParamUpdate,
+    166: MsgRtcSync,
+    167: MsgRssiStream,
+    168: MsgAccelSteps,
+    169: MsgLinkParamUpdate,
+    170: MsgAccelTapSensitivity,
+    171: MsgCentralControl,
+    172: MsgScanResult,
+    173: MsgCentralAction,
+    174: MsgRelayData,
 }
