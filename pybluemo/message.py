@@ -239,6 +239,33 @@ class EnumAccelDataRate(object):
     F800 = 14
 
 
+class EnumAccelAxis(object):
+    Z = 0
+    Y = 1
+    X = 2
+
+
+class EnumAccelTapsTicsTh(object):
+    SIX_SAMPLES = 0
+    NINE_SAMPLES = 1
+    TWELVE_SAMPLES = 2
+    EIGHTEEN_SAMPLES = 3
+
+
+class EnumAccelTapsQuiet(object):
+    SIXTY_SAMPLES = 0
+    EIGHTY_SAMPLES = 1
+    HUNDRED_SAMPLES = 2
+    HUNDRED_TWENTY_SAMPLES = 3
+
+
+class EnumAccelTapsQuietDt(object):
+    FOUR_SAMPLES = 0
+    EIGHT_SAMPLES = 1
+    TWELVE_SAMPLES = 2
+    SIXTEEN_SAMPLES = 3
+
+
 class EnumSensorEvent(object):
     SINGLE_TAP = 0
     DOUBLE_TAP = 1
@@ -393,6 +420,86 @@ class EnumRgbColorBytes(object):
     GREEN_RED_BLUE = 1
     RED_GREEN_BLUE_INVERTED = 2
     GREEN_RED_BLUE_INVERTED = 3
+
+
+class EnumAccelAxes(object):
+    NONE = 0
+    X = 1
+    Y = 2
+    X_Y = 3
+    Z = 4
+    X_Z = 5
+    Y_Z = 6
+    X_Y_Z = 7
+
+
+class EnumActivityNumPoints(object):
+    THIRTY_TWO = 0
+    SIXTY_FOUR = 1
+    HUNDRED_TWENTY_EIGHT = 2
+    TWO_FIFTY_SIX = 3
+    FIVE_TWELVE = 4
+
+
+class EnumAccelStepsConfig(object):
+    NO_CHANGE = 0
+    WRIST = 1
+    NON_WRIST = 2
+
+
+class EnumAdsPartId(object):
+    ADS1013 = 0
+    ADS1014 = 1
+    ADS1015 = 2
+    ADS1113 = 3
+    ADS1114 = 4
+    ADS1115 = 5
+
+
+class EnumAdsI2cAddr(object):
+    GND0X48 = 0
+    VDD0X49 = 1
+    SDA0X4_A = 2
+    SCL0X4_B = 3
+
+
+class EnumAdsPga(object):
+    FSR6P144 = 0
+    FSR4P096 = 1
+    FSR2P048 = 2
+    FSR1P024 = 3
+    FSR0P512 = 4
+    FSR0P256 = 5
+
+
+class EnumAdsDataRate(object):
+    SINGLE_SAMPLE = 0
+    ADS11XX8_SPS = 1
+    ADS11XX16_SPS = 2
+    ADS11XX32_SPS = 3
+    ADS11XX64_SPS = 4
+    ADS11XX128_SPS = 5
+    ADS11XX250_SPS = 6
+    ADS11XX475_SPS = 7
+    ADS11XX860_SPS = 8
+    ADS10XX128_SPS = 9
+    ADS10XX250_SPS = 10
+    ADS10XX490_SPS = 11
+    ADS10XX920_SPS = 12
+    ADS10XX1600_SPS = 13
+    ADS10XX2400_SPS = 14
+    ADS10XX3300_SPS = 15
+
+
+class EnumAdsInputMux(object):
+    AIN0_AIN1 = 0
+    AIN0_AIN3 = 1
+    AIN1_AIN3 = 2
+    AIN2_AIN3 = 3
+    AIN0_GND = 4
+    AIN1_GND = 5
+    AIN2_GND = 6
+    AIN3_GND = 7
 
 
 class MsgError(MessageDefinition):
@@ -732,7 +839,7 @@ class MsgAccelInit(MessageDefinition):
     _MSG_NAME = "AccelInit"
     _CMD_CODE = 20
     _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ChipSelectPin', 'Type': 'int8_t', 'Description': 'Set to 0xFF for I2C mode.', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'Int1Pin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'Int2Pin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}]
-    _RSP_PARAMS = [{'Name': 'AccelModel', 'Type': 'uint8_t', 'Enum': 'SensorModel'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Int1Pin', 'Type': 'uint8_t'}, {'Name': 'Int2Pin', 'Type': 'uint8_t'}]
+    _RSP_PARAMS = [{'Name': 'AccelModel', 'Type': 'uint8_t', 'Enum': 'SensorModel'}, {'Name': 'ChipSelectPin', 'Type': 'uint8_t'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Int1Pin', 'Type': 'uint8_t'}, {'Name': 'Int2Pin', 'Type': 'uint8_t'}]
 
     @classmethod
     def builder(cls, modify=0, chip_select_pin=-1, int1_pin=-1, int2_pin=-1):
@@ -763,11 +870,11 @@ class MsgAccelUninit(MessageDefinition):
 class MsgAccelStream(MessageDefinition):
     _MSG_NAME = "AccelStream"
     _CMD_CODE = 22
-    _CMD_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AccelDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AccelDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AccelWatermark'}]
+    _CMD_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AccelDataRange', 'Default': 2}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AccelDataRate', 'Default': 12}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AccelWatermark', 'Default': 16}]
     _RSP_PARAMS = [{'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AccelDataRange'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AccelDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t'}, {'Name': 'AccelData', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, data_range, data_rate, watermark):
+    def builder(cls, data_range=2, data_rate=12, watermark=16):
         msg = cls()
         msg.parameters = {
             "DataRange": data_range,
@@ -844,11 +951,11 @@ class MsgGyroStream(MessageDefinition):
 class MsgPinAnalogInput(MessageDefinition):
     _MSG_NAME = "PinAnalogInput"
     _CMD_CODE = 27
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'AnalogInputInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'SaadcPullConfig', 'Default': 0}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain', 'Default': 0}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel', 'Default': 0}, {'Name': 'Tacq', 'Type': 'uint8_t', 'Enum': 'SaadcTacq'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'AnalogInputInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'SaadcPullConfig', 'Default': 0}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain', 'Default': 0}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel', 'Default': 0}, {'Name': 'Tacq', 'Type': 'uint8_t', 'Enum': 'SaadcTacq', 'Default': 0}]
     _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'PullConfig', 'Type': 'uint8_t', 'Enum': 'SaadcPullConfig'}, {'Name': 'Gain', 'Type': 'uint8_t', 'Enum': 'SaadcGain'}, {'Name': 'RefSel', 'Type': 'uint8_t', 'Enum': 'SaadcRefSel'}, {'Name': 'Tacq', 'Type': 'uint8_t', 'Enum': 'SaadcTacq'}, {'Name': 'Measurement', 'Type': 'int16_t'}]
 
     @classmethod
-    def builder(cls, instance, tacq, modify=0, pull_config=0, gain=0, ref_sel=0):
+    def builder(cls, instance, modify=0, pull_config=0, gain=0, ref_sel=0, tacq=0):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
@@ -883,7 +990,7 @@ class MsgAnalogStream(MessageDefinition):
 class MsgPinLedData(MessageDefinition):
     _MSG_NAME = "PinLedData"
     _CMD_CODE = 29
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'RgbColorBytes', 'Type': 'uint8_t', 'Enum': 'RgbColorBytes', 'Default': 1}, {'Name': 'LedLength', 'Type': 'uint16_t', 'Range': 'LedLength'}, {'Name': 'AnimationLength', 'Type': 'uint16_t', 'Default': 0}, {'Name': 'AnimationPeriodMs', 'Type': 'uint16_t', 'Range': 'AnimationPeriod'}, {'Name': 'AnimationType', 'Type': 'uint8_t', 'Enum': 'AnimationType'}, {'Name': 'Encoding', 'Type': 'uint8_t *', 'DataStructure': 'RgbRunLengthEncoding', 'MaxLength': 'BufferLimited'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'RgbColorBytes', 'Type': 'uint8_t', 'Enum': 'RgbColorBytes', 'Default': 1}, {'Name': 'LedLength', 'Type': 'uint16_t', 'Range': 'LedLength'}, {'Name': 'AnimationLength', 'Type': 'uint16_t', 'Range': 'LedLength', 'Default': 0}, {'Name': 'AnimationPeriodMs', 'Type': 'uint16_t', 'Range': 'AnimationPeriod'}, {'Name': 'AnimationType', 'Type': 'uint8_t', 'Enum': 'AnimationType'}, {'Name': 'Encoding', 'Type': 'uint8_t *', 'DataStructure': 'RgbRunLengthEncoding', 'MaxLength': 'BufferLimited'}]
     _RSP_PARAMS = [{'Name': 'RgbColorBytes', 'Type': 'uint8_t', 'Enum': 'RgbColorBytes'}, {'Name': 'LedLength', 'Type': 'uint16_t'}, {'Name': 'AnimationLength', 'Type': 'uint16_t'}, {'Name': 'AnimationPeriodMs', 'Type': 'uint32_t'}, {'Name': 'AnimationType', 'Type': 'uint8_t'}, {'Name': 'Encoding', 'Type': 'uint8_t *', 'DataStructure': 'RgbRunLengthEncoding'}]
 
     @classmethod
@@ -1093,15 +1200,15 @@ class MsgRssiStream(MessageDefinition):
 class MsgAccelSteps(MessageDefinition):
     _MSG_NAME = "AccelSteps"
     _CMD_CODE = 40
-    _CMD_PARAMS = [{'Name': 'ResetCount', 'Type': 'uint8_t', 'Range': 'Boolean', 'Default': 1}, {'Name': 'SamplePeriod_100ms', 'Type': 'uint16_t', 'Range': 'RssiSamplePeriod', 'Default': 600}]
+    _CMD_PARAMS = [{'Name': 'SamplePeriod_100ms', 'Type': 'uint16_t', 'Range': 'RssiSamplePeriod', 'Default': 600}, {'Name': 'StepsConfig', 'Type': 'uint8_t', 'Enum': 'AccelStepsConfig', 'Default': 0}]
     _RSP_PARAMS = [{'Name': 'SamplePeriod_100ms', 'Type': 'uint16_t'}, {'Name': 'CurrentStepCount', 'Type': 'uint32_t'}]
 
     @classmethod
-    def builder(cls, reset_count=1, sample_period_100ms=600):
+    def builder(cls, sample_period_100ms=600, steps_config=0):
         msg = cls()
         msg.parameters = {
-            "ResetCount": reset_count,
             "SamplePeriod_100ms": sample_period_100ms,
+            "StepsConfig": steps_config,
         }
         return msg
 
@@ -1126,17 +1233,22 @@ class MsgLinkParamUpdate(MessageDefinition):
         return msg
 
 
-class MsgAccelTapSensitivity(MessageDefinition):
-    _MSG_NAME = "AccelTapSensitivity"
+class MsgAccelTapConfig(MessageDefinition):
+    _MSG_NAME = "AccelTapConfig"
     _CMD_CODE = 42
-    _CMD_PARAMS = [{'Name': 'Sensitivity', 'Type': 'uint8_t', 'Range': 'TapSensitivity'}]
-    _RSP_PARAMS = [{'Name': 'Sensitivity', 'Type': 'uint8_t'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'Axis', 'Type': 'uint8_t', 'Enum': 'AccelAxis'}, {'Name': 'Sensitivity', 'Type': 'uint8_t', 'Range': 'AccelTapSensitivity'}, {'Name': 'TicsTh', 'Type': 'uint8_t', 'Enum': 'AccelTapsTicsTh'}, {'Name': 'Quiet', 'Type': 'uint8_t', 'Enum': 'AccelTapsQuiet'}, {'Name': 'QuietDt', 'Type': 'uint8_t', 'Enum': 'AccelTapsQuietDt'}]
+    _RSP_PARAMS = [{'Name': 'Axis', 'Type': 'uint8_t', 'Enum': 'AccelAxis'}, {'Name': 'Sensitivity', 'Type': 'uint8_t', 'Range': 'AccelTapSensitivity'}, {'Name': 'TicsTh', 'Type': 'uint8_t', 'Enum': 'AccelTapsTicsTh'}, {'Name': 'Quiet', 'Type': 'uint8_t', 'Enum': 'AccelTapsQuiet'}, {'Name': 'QuietDt', 'Type': 'uint8_t', 'Enum': 'AccelTapsQuietDt'}]
 
     @classmethod
-    def builder(cls, sensitivity):
+    def builder(cls, modify, axis, sensitivity, tics_th, quiet, quiet_dt):
         msg = cls()
         msg.parameters = {
+            "Modify": modify,
+            "Axis": axis,
             "Sensitivity": sensitivity,
+            "TicsTh": tics_th,
+            "Quiet": quiet,
+            "QuietDt": quiet_dt,
         }
         return msg
 
@@ -1209,6 +1321,84 @@ class MsgRelayData(MessageDefinition):
         return msg
 
 
+class MsgAccelActivityConfig(MessageDefinition):
+    _MSG_NAME = "AccelActivityConfig"
+    _CMD_CODE = 47
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'Threshold', 'Type': 'uint8_t'}, {'Name': 'Axes', 'Type': 'uint8_t', 'Enum': 'AccelAxes'}, {'Name': 'NumPoints', 'Type': 'uint8_t', 'Enum': 'ActivityNumPoints'}]
+    _RSP_PARAMS = [{'Name': 'Threshold', 'Type': 'uint8_t'}, {'Name': 'Axes', 'Type': 'uint8_t', 'Enum': 'AccelAxes'}, {'Name': 'NumPoints', 'Type': 'uint8_t', 'Enum': 'ActivityNumPoints'}]
+
+    @classmethod
+    def builder(cls, modify, threshold, axes, num_points):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "Threshold": threshold,
+            "Axes": axes,
+            "NumPoints": num_points,
+        }
+        return msg
+
+
+class MsgAccelOrientConfig(MessageDefinition):
+    _MSG_NAME = "AccelOrientConfig"
+    _CMD_CODE = 48
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'Axes', 'Type': 'uint8_t', 'Enum': 'AccelAxes'}, {'Name': 'Threshold', 'Type': 'uint8_t'}, {'Name': 'Duration', 'Type': 'uint8_t'}, {'Name': 'ReferenceX', 'Type': 'uint16_t', 'Range': 'AccelOrientRef'}, {'Name': 'ReferenceY', 'Type': 'uint16_t', 'Range': 'AccelOrientRef'}, {'Name': 'ReferenceZ', 'Type': 'uint16_t', 'Range': 'AccelOrientRef'}]
+    _RSP_PARAMS = [{'Name': 'Axes', 'Type': 'uint8_t', 'Enum': 'AccelAxes'}, {'Name': 'Threshold', 'Type': 'uint8_t'}, {'Name': 'Duration', 'Type': 'uint8_t'}, {'Name': 'ReferenceX', 'Type': 'uint16_t', 'Range': 'AccelOrientRef'}, {'Name': 'ReferenceY', 'Type': 'uint16_t', 'Range': 'AccelOrientRef'}, {'Name': 'ReferenceZ', 'Type': 'uint16_t', 'Range': 'AccelOrientRef'}]
+
+    @classmethod
+    def builder(cls, modify, axes, threshold, duration, reference_x, reference_y, reference_z):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "Axes": axes,
+            "Threshold": threshold,
+            "Duration": duration,
+            "ReferenceX": reference_x,
+            "ReferenceY": reference_y,
+            "ReferenceZ": reference_z,
+        }
+        return msg
+
+
+class MsgAdsAnalogInit(MessageDefinition):
+    _MSG_NAME = "AdsAnalogInit"
+    _CMD_CODE = 49
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Model', 'Type': 'uint8_t', 'Enum': 'AdsPartId'}, {'Name': 'I2cAddr', 'Type': 'uint8_t', 'Enum': 'AdsI2cAddr'}, {'Name': 'AddrPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'IntPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Model', 'Type': 'uint8_t', 'Enum': 'AdsPartId'}, {'Name': 'I2cAddr', 'Type': 'uint8_t', 'Enum': 'AdsI2cAddr'}, {'Name': 'AddrPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'IntPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'AddrPinControlInst', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'ConfigValue', 'Type': 'uint16_t'}]
+
+    @classmethod
+    def builder(cls, modify, instance, model, i2c_addr, addr_pin, int_pin):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "Instance": instance,
+            "Model": model,
+            "I2cAddr": i2c_addr,
+            "AddrPin": addr_pin,
+            "IntPin": int_pin,
+        }
+        return msg
+
+
+class MsgAdsAnalogStream(MessageDefinition):
+    _MSG_NAME = "AdsAnalogStream"
+    _CMD_CODE = 50
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AdsPga'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AdsDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AdsWatermark', 'Default': 16}, {'Name': 'InputMux', 'Type': 'uint8_t', 'Enum': 'AdsInputMux', 'Default': 0}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AdsPga'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AdsDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AdsWatermark'}, {'Name': 'InputMux', 'Type': 'uint8_t', 'Enum': 'AdsInputMux'}, {'Name': 'AdcData', 'Type': 'uint8_t *'}]
+
+    @classmethod
+    def builder(cls, instance, data_range, data_rate, watermark=16, input_mux=0):
+        msg = cls()
+        msg.parameters = {
+            "Instance": instance,
+            "DataRange": data_range,
+            "DataRate": data_rate,
+            "Watermark": watermark,
+            "InputMux": input_mux,
+        }
+        return msg
+
+
 MSG_CLASS_BY_RSP_CODE = {
     128: MsgError,
     129: MsgDeviceName,
@@ -1252,9 +1442,13 @@ MSG_CLASS_BY_RSP_CODE = {
     167: MsgRssiStream,
     168: MsgAccelSteps,
     169: MsgLinkParamUpdate,
-    170: MsgAccelTapSensitivity,
+    170: MsgAccelTapConfig,
     171: MsgCentralControl,
     172: MsgScanResult,
     173: MsgCentralAction,
     174: MsgRelayData,
+    175: MsgAccelActivityConfig,
+    176: MsgAccelOrientConfig,
+    177: MsgAdsAnalogInit,
+    178: MsgAdsAnalogStream,
 }
