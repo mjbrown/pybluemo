@@ -186,7 +186,7 @@ class EnumPinFunction(object):
     PIN_SERVO_PULSE = 5
     PIN_SERVO_CLOCK = 6
     PIN_SERVO_RESET = 7
-    PIN_PWM_CHANNEL = 8
+    PIN_PWM = 8
     PIN_ROBOTIS = 9
     TOTAL_FUNCTIONS = 10
 
@@ -277,6 +277,7 @@ class EnumSensorEvent(object):
     ACTIVITY_CHANGE_X = 7
     ACTIVITY_CHANGE_Y = 8
     ACTIVITY_CHANGE_Z = 9
+    TAP_REQUEST = 10
 
 
 class EnumGyroDataRange(object):
@@ -474,21 +475,22 @@ class EnumAdsPga(object):
 
 class EnumAdsDataRate(object):
     SINGLE_SAMPLE = 0
-    ADS11XX8_SPS = 1
-    ADS11XX16_SPS = 2
-    ADS11XX32_SPS = 3
-    ADS11XX64_SPS = 4
-    ADS11XX128_SPS = 5
-    ADS11XX250_SPS = 6
-    ADS11XX475_SPS = 7
-    ADS11XX860_SPS = 8
-    ADS10XX128_SPS = 9
-    ADS10XX250_SPS = 10
-    ADS10XX490_SPS = 11
-    ADS10XX920_SPS = 12
-    ADS10XX1600_SPS = 13
-    ADS10XX2400_SPS = 14
-    ADS10XX3300_SPS = 15
+    CUSTOM_PERIOD = 1
+    ADS11XX8_SPS = 2
+    ADS11XX16_SPS = 3
+    ADS11XX32_SPS = 4
+    ADS11XX64_SPS = 5
+    ADS11XX128_SPS = 6
+    ADS11XX250_SPS = 7
+    ADS11XX475_SPS = 8
+    ADS11XX860_SPS = 9
+    ADS10XX128_SPS = 10
+    ADS10XX250_SPS = 11
+    ADS10XX490_SPS = 12
+    ADS10XX920_SPS = 13
+    ADS10XX1600_SPS = 14
+    ADS10XX2400_SPS = 15
+    ADS10XX3300_SPS = 16
 
 
 class EnumAdsInputMux(object):
@@ -500,6 +502,14 @@ class EnumAdsInputMux(object):
     AIN1_GND = 5
     AIN2_GND = 6
     AIN3_GND = 7
+
+
+class EnumExperimentType(object):
+    ACCEL_SENSITIVITY_CYCLE = 0
+    ACCEL_RAW_DATA = 1
+    ACCEL_TAP_REQUEST = 2
+    ADS_RAW_DATA = 3
+    ALL_EXPERIMENTS = 4
 
 
 class MsgError(MessageDefinition):
@@ -1083,11 +1093,11 @@ class MsgRobotisCommand(MessageDefinition):
         return msg
 
 
-class MsgPinPwmChannel(MessageDefinition):
-    _MSG_NAME = "PinPwmChannel"
+class MsgPinPwm(MessageDefinition):
+    _MSG_NAME = "PinPwm"
     _CMD_CODE = 34
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'PwmInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'MinPeriod', 'Type': 'uint16_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint16_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint16_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'MinPeriod', 'Type': 'uint16_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint16_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint16_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'PwmInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'MinPeriod', 'Type': 'uint32_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint32_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint32_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *', 'MaxLength': 16}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'MinPeriod', 'Type': 'uint32_t'}, {'Name': 'MinPulseWidth', 'Type': 'uint32_t'}, {'Name': 'MaxPulseWidth', 'Type': 'uint32_t'}, {'Name': 'ChannelName', 'Type': 'uint8_t *'}]
 
     @classmethod
     def builder(cls, instance, modify, min_period, min_pulse_width, max_pulse_width, channel_name):
@@ -1103,19 +1113,21 @@ class MsgPinPwmChannel(MessageDefinition):
         return msg
 
 
-class MsgPwmChannelControl(MessageDefinition):
-    _MSG_NAME = "PwmChannelControl"
+class MsgPwmControl(MessageDefinition):
+    _MSG_NAME = "PwmControl"
     _CMD_CODE = 35
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'PwmInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Channel', 'Type': 'uint8_t'}, {'Name': 'PulseWidth', 'Type': 'uint16_t'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Range': 'PwmInstance', 'Index': True}, {'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'Period', 'Type': 'uint32_t'}, {'Name': 'PulseWidth', 'Type': 'uint32_t'}, {'Name': 'PulseCount', 'Type': 'uint32_t'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Period', 'Type': 'uint32_t'}, {'Name': 'PulseWidth', 'Type': 'uint32_t'}, {'Name': 'PulseCount', 'Type': 'uint32_t'}]
 
     @classmethod
-    def builder(cls, instance, modify, pulse_width):
+    def builder(cls, instance, modify, period, pulse_width, pulse_count):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
             "Modify": modify,
+            "Period": period,
             "PulseWidth": pulse_width,
+            "PulseCount": pulse_count,
         }
         return msg
 
@@ -1363,8 +1375,8 @@ class MsgAccelOrientConfig(MessageDefinition):
 class MsgAdsAnalogInit(MessageDefinition):
     _MSG_NAME = "AdsAnalogInit"
     _CMD_CODE = 49
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Model', 'Type': 'uint8_t', 'Enum': 'AdsPartId'}, {'Name': 'I2cAddr', 'Type': 'uint8_t', 'Enum': 'AdsI2cAddr'}, {'Name': 'AddrPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'IntPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'Model', 'Type': 'uint8_t', 'Enum': 'AdsPartId'}, {'Name': 'I2cAddr', 'Type': 'uint8_t', 'Enum': 'AdsI2cAddr'}, {'Name': 'AddrPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'IntPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'AddrPinControlInst', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'ConfigValue', 'Type': 'uint16_t'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Model', 'Type': 'uint8_t', 'Enum': 'AdsPartId'}, {'Name': 'I2cAddr', 'Type': 'uint8_t', 'Enum': 'AdsI2cAddr'}, {'Name': 'AddrPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'IntPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'Model', 'Type': 'uint8_t', 'Enum': 'AdsPartId'}, {'Name': 'I2cAddr', 'Type': 'uint8_t', 'Enum': 'AdsI2cAddr'}, {'Name': 'AddrPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'IntPin', 'Type': 'uint8_t', 'Range': 'PinIndex'}, {'Name': 'AddrPinControlInst', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'ConfigValue', 'Type': 'uint16_t'}]
 
     @classmethod
     def builder(cls, modify, instance, model, i2c_addr, addr_pin, int_pin):
@@ -1383,18 +1395,36 @@ class MsgAdsAnalogInit(MessageDefinition):
 class MsgAdsAnalogStream(MessageDefinition):
     _MSG_NAME = "AdsAnalogStream"
     _CMD_CODE = 50
-    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AdsPga'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AdsDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AdsWatermark', 'Default': 16}, {'Name': 'InputMux', 'Type': 'uint8_t', 'Enum': 'AdsInputMux', 'Default': 0}]
-    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t'}, {'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AdsPga'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AdsDataRate'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AdsWatermark'}, {'Name': 'InputMux', 'Type': 'uint8_t', 'Enum': 'AdsInputMux'}, {'Name': 'AdcData', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AdsPga'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AdsDataRate'}, {'Name': 'CustomPeriod', 'Type': 'uint16_t', 'Range': 'AdsSamplePeriod', 'Default': 8}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AdsWatermark', 'Default': 16}, {'Name': 'InputMux', 'Type': 'uint8_t', 'Enum': 'AdsInputMux', 'Default': 0}]
+    _RSP_PARAMS = [{'Name': 'Instance', 'Type': 'uint8_t', 'Index': True}, {'Name': 'DataRange', 'Type': 'uint8_t', 'Enum': 'AdsPga'}, {'Name': 'DataRate', 'Type': 'uint8_t', 'Enum': 'AdsDataRate'}, {'Name': 'CustomPeriod', 'Type': 'uint16_t', 'Range': 'AdsSamplePeriod'}, {'Name': 'Watermark', 'Type': 'uint8_t', 'Range': 'AdsWatermark'}, {'Name': 'InputMux', 'Type': 'uint8_t', 'Enum': 'AdsInputMux'}, {'Name': 'AdcData', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, instance, data_range, data_rate, watermark=16, input_mux=0):
+    def builder(cls, instance, data_range, data_rate, custom_period=8, watermark=16, input_mux=0):
         msg = cls()
         msg.parameters = {
             "Instance": instance,
             "DataRange": data_range,
             "DataRate": data_rate,
+            "CustomPeriod": custom_period,
             "Watermark": watermark,
             "InputMux": input_mux,
+        }
+        return msg
+
+
+class MsgExperimentControl(MessageDefinition):
+    _MSG_NAME = "ExperimentControl"
+    _CMD_CODE = 51
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'ExperimentType', 'Type': 'uint8_t', 'Enum': 'ExperimentType', 'Index': True}, {'Name': 'Enable', 'Type': 'uint8_t'}]
+    _RSP_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'ExperimentType', 'Type': 'uint8_t', 'Enum': 'ExperimentType'}, {'Name': 'Enable', 'Type': 'uint8_t'}]
+
+    @classmethod
+    def builder(cls, modify, experiment_type, enable):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "ExperimentType": experiment_type,
+            "Enable": enable,
         }
         return msg
 
@@ -1434,8 +1464,8 @@ MSG_CLASS_BY_RSP_CODE = {
     159: MsgServoControl,
     160: MsgPinRobotis,
     161: MsgRobotisCommand,
-    162: MsgPinPwmChannel,
-    163: MsgPwmChannelControl,
+    162: MsgPinPwm,
+    163: MsgPwmControl,
     164: MsgAdvertisingConfig,
     165: MsgConnParamUpdate,
     166: MsgRtcSync,
@@ -1451,4 +1481,5 @@ MSG_CLASS_BY_RSP_CODE = {
     176: MsgAccelOrientConfig,
     177: MsgAdsAnalogInit,
     178: MsgAdsAnalogStream,
+    179: MsgExperimentControl,
 }
