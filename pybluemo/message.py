@@ -212,6 +212,7 @@ class EnumFlashModel(object):
     UNKNOWN_DEVICE_ID = 0
     AT25_DF321_A = 1
     AT45_DB641_E = 2
+    W25N01GV = 3
 
 
 class EnumAccelDataRange(object):
@@ -512,6 +513,13 @@ class EnumExperimentType(object):
     ALL_EXPERIMENTS = 4
 
 
+class EnumDataSink(object):
+    BLE = 0
+    SPI_FLASH = 1
+    USB = 2
+    TOTAL = 3
+
+
 class MsgError(MessageDefinition):
     _MSG_NAME = "Error"
     _CMD_CODE = 0
@@ -765,17 +773,18 @@ class MsgSpiTransfer(MessageDefinition):
 class MsgSpiFlashInit(MessageDefinition):
     _MSG_NAME = "SpiFlashInit"
     _CMD_CODE = 15
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ChipSelectPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'WriteProtectPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'ResetPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}]
-    _RSP_PARAMS = [{'Name': 'FlashModel', 'Type': 'uint8_t', 'Enum': 'FlashModel'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'WpPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'RstPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'DeviceId', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify', 'Default': 0}, {'Name': 'ChipSelectPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'WriteProtectPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'ResetPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}, {'Name': 'HoldPin', 'Type': 'int8_t', 'Range': 'OptionalPinIndex', 'Default': -1}]
+    _RSP_PARAMS = [{'Name': 'FlashModel', 'Type': 'uint8_t', 'Enum': 'FlashModel'}, {'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'WpPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'RstPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'HoldPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'FlashSizeKilobytes', 'Type': 'uint32_t'}, {'Name': 'PageSizeBytes', 'Type': 'uint32_t'}, {'Name': 'BlockSizeBytes', 'Type': 'uint32_t'}]
 
     @classmethod
-    def builder(cls, modify=0, chip_select_pin=-1, write_protect_pin=-1, reset_pin=-1):
+    def builder(cls, modify=0, chip_select_pin=-1, write_protect_pin=-1, reset_pin=-1, hold_pin=-1):
         msg = cls()
         msg.parameters = {
             "Modify": modify,
             "ChipSelectPin": chip_select_pin,
             "WriteProtectPin": write_protect_pin,
             "ResetPin": reset_pin,
+            "HoldPin": hold_pin,
         }
         return msg
 
@@ -797,14 +806,13 @@ class MsgSpiFlashDisconnect(MessageDefinition):
 class MsgSpiFlashErase(MessageDefinition):
     _MSG_NAME = "SpiFlashErase"
     _CMD_CODE = 17
-    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
-    _RSP_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
+    _CMD_PARAMS = [{'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
+    _RSP_PARAMS = [{'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
 
     @classmethod
-    def builder(cls, cs_pin_control_instance, address, length):
+    def builder(cls, address, length):
         msg = cls()
         msg.parameters = {
-            "CsPinControlInstance": cs_pin_control_instance,
             "Address": address,
             "Length": length,
         }
@@ -814,14 +822,13 @@ class MsgSpiFlashErase(MessageDefinition):
 class MsgSpiFlashRead(MessageDefinition):
     _MSG_NAME = "SpiFlashRead"
     _CMD_CODE = 18
-    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t', 'Range': 'BufferLimited'}]
-    _RSP_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Data', 'Type': 'uint8_t *'}]
+    _CMD_PARAMS = [{'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t', 'Range': 'BufferLimited'}]
+    _RSP_PARAMS = [{'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Data', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, cs_pin_control_instance, address, length):
+    def builder(cls, address, length):
         msg = cls()
         msg.parameters = {
-            "CsPinControlInstance": cs_pin_control_instance,
             "Address": address,
             "Length": length,
         }
@@ -831,14 +838,13 @@ class MsgSpiFlashRead(MessageDefinition):
 class MsgSpiFlashWrite(MessageDefinition):
     _MSG_NAME = "SpiFlashWrite"
     _CMD_CODE = 19
-    _CMD_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t', 'Range': 'PinControlInstance'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Data', 'Type': 'uint8_t *'}]
-    _RSP_PARAMS = [{'Name': 'CsPinControlInstance', 'Type': 'uint8_t'}, {'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
+    _CMD_PARAMS = [{'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Data', 'Type': 'uint8_t *'}]
+    _RSP_PARAMS = [{'Name': 'Address', 'Type': 'uint32_t'}, {'Name': 'Length', 'Type': 'uint32_t'}]
 
     @classmethod
-    def builder(cls, cs_pin_control_instance, address, data):
+    def builder(cls, address, data):
         msg = cls()
         msg.parameters = {
-            "CsPinControlInstance": cs_pin_control_instance,
             "Address": address,
             "Data": data,
         }
@@ -1179,15 +1185,13 @@ class MsgConnParamUpdate(MessageDefinition):
 class MsgRtcSync(MessageDefinition):
     _MSG_NAME = "RtcSync"
     _CMD_CODE = 38
-    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'SyncValue', 'Type': 'uint32_t'}]
-    _RSP_PARAMS = [{'Name': 'CurrentClock', 'Type': 'uint32_t'}, {'Name': 'SyncValue', 'Type': 'uint32_t'}]
+    _CMD_PARAMS = []
+    _RSP_PARAMS = [{'Name': 'RtcCounter', 'Type': 'uint8_t *'}]
 
     @classmethod
-    def builder(cls, modify, sync_value):
+    def builder(cls):
         msg = cls()
         msg.parameters = {
-            "Modify": modify,
-            "SyncValue": sync_value,
         }
         return msg
 
@@ -1429,6 +1433,38 @@ class MsgExperimentControl(MessageDefinition):
         return msg
 
 
+class MsgDataSinkControl(MessageDefinition):
+    _MSG_NAME = "DataSinkControl"
+    _CMD_CODE = 52
+    _CMD_PARAMS = [{'Name': 'Modify', 'Type': 'uint8_t', 'Enum': 'Modify'}, {'Name': 'CommandCode', 'Type': 'uint8_t'}, {'Name': 'DataSink', 'Type': 'uint8_t', 'Enum': 'DataSink'}]
+    _RSP_PARAMS = [{'Name': 'CommandCode', 'Type': 'uint8_t'}, {'Name': 'DataSink', 'Type': 'uint8_t', 'Enum': 'DataSink'}]
+
+    @classmethod
+    def builder(cls, modify, command_code, data_sink):
+        msg = cls()
+        msg.parameters = {
+            "Modify": modify,
+            "CommandCode": command_code,
+            "DataSink": data_sink,
+        }
+        return msg
+
+
+class MsgDataSinkConfig(MessageDefinition):
+    _MSG_NAME = "DataSinkConfig"
+    _CMD_CODE = 53
+    _CMD_PARAMS = [{'Name': 'AutoErase', 'Type': 'uint8_t'}]
+    _RSP_PARAMS = [{'Name': 'StartAddress', 'Type': 'uint32_t'}, {'Name': 'NextAddress', 'Type': 'uint32_t'}]
+
+    @classmethod
+    def builder(cls, auto_erase):
+        msg = cls()
+        msg.parameters = {
+            "AutoErase": auto_erase,
+        }
+        return msg
+
+
 MSG_CLASS_BY_RSP_CODE = {
     128: MsgError,
     129: MsgDeviceName,
@@ -1482,4 +1518,6 @@ MSG_CLASS_BY_RSP_CODE = {
     177: MsgAdsAnalogInit,
     178: MsgAdsAnalogStream,
     179: MsgExperimentControl,
+    180: MsgDataSinkControl,
+    181: MsgDataSinkConfig,
 }

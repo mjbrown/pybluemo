@@ -51,8 +51,8 @@ class AbstractBaseYasp(ProcedureManager):
             length = self.buffer[0]
             if length > 127:
                 if len(self.buffer) > hdr_len:
-                    length = (self.buffer[0] & 0x7F) + ((self.buffer[1] & 0xF) << 7)
-                    if self.buffer[1] > 0xF:
+                    length = (self.buffer[0] & 0x7F) + ((self.buffer[1] & 0x7F) << 7)
+                    if self.buffer[1] > 0x7F:
                         logger.error("RX Overrun, packets dropped.")
                     hdr_len += 1
                 else:
@@ -127,6 +127,7 @@ class YaspClient(AbstractBaseYasp):
 
     def cmd_handler(self, cmd, payload):
         if cmd not in self.msg_class_lookup:
+            return
             raise RuntimeError()
         response = self.msg_class_lookup[cmd].rsp_recv(payload)
         if len(self.cmd_callbacks[cmd]) == 0:       # Callback not specified
