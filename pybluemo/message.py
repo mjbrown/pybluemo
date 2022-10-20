@@ -34,6 +34,8 @@ class MessageDefinition(object):
         for param in param_list:
             if param[MSG_PARAM_TYPE] == "uint8_t":
                 format_str += "B"
+            elif param[MSG_PARAM_TYPE] == "int8_t":
+                format_str += "b"
             elif param[MSG_PARAM_TYPE] == "uint16_t":
                 format_str += "H"
             elif param[MSG_PARAM_TYPE] == "int16_t":
@@ -1453,14 +1455,13 @@ class MsgDataSinkControl(MessageDefinition):
 class MsgDataSinkConfig(MessageDefinition):
     _MSG_NAME = "DataSinkConfig"
     _CMD_CODE = 53
-    _CMD_PARAMS = [{'Name': 'AutoErase', 'Type': 'uint8_t'}]
+    _CMD_PARAMS = []
     _RSP_PARAMS = [{'Name': 'StartAddress', 'Type': 'uint32_t'}, {'Name': 'NextAddress', 'Type': 'uint32_t'}]
 
     @classmethod
-    def builder(cls, auto_erase):
+    def builder(cls):
         msg = cls()
         msg.parameters = {
-            "AutoErase": auto_erase,
         }
         return msg
 
